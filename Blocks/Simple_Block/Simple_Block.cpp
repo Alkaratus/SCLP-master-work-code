@@ -3,6 +3,7 @@
 //
 
 #include "Simple_Block.h"
+#include "../Visitor/Visitor.h"
 
 using std::vector, std::shared_ptr;
 
@@ -11,21 +12,21 @@ Element_3D calculate_block_size(Insertable_Element* single_element_pointer,const
 
 Element_3D calculate_block_size(const std::vector<std::vector<std::vector<shared_ptr<Insertable_Element>>>>& block_elements_pointers);
 
-Simple_Block::Simple_Block(vector<shared_ptr<Insertable_Element>> block_elements_pointers, const Block_Elements_Numbers &elements_numbers):
+Simple_Block::Simple_Block(vector<shared_ptr<Insertable_Element>> &block_elements_pointers, const Block_Elements_Numbers &elements_numbers):
 Insertable_Element(
         calculate_block_size(block_elements_pointers[0].get(),elements_numbers).get_width(),
         calculate_block_size(block_elements_pointers[0].get(),elements_numbers).get_depth(),
         calculate_block_size(block_elements_pointers[0].get(),elements_numbers).get_height()
         ){
-    vector<shared_ptr<Insertable_Element>> row(elements_numbers.get_elements_number_in_width(), nullptr);
-    vector<vector<shared_ptr<Insertable_Element>>> layer(elements_numbers.get_elements_number_in_depth(),row);
-    this->block_elements_pointers=vector<vector<vector<shared_ptr<Insertable_Element>>>>(elements_numbers.get_elements_number_in_height(),layer);
+    vector<Insertable_Element*> row(elements_numbers.get_elements_number_in_width(), nullptr);
+    vector<vector<Insertable_Element*>> layer(elements_numbers.get_elements_number_in_depth(),row);
+    this->block_elements_pointers=vector<vector<vector<Insertable_Element*>>>(elements_numbers.get_elements_number_in_height(),layer);
     //TODO trzeba dodać weryfikację ilości elementów w vector
     unsigned int vector_index=0;
     for(unsigned int i=0;i<elements_numbers.get_elements_number_in_height();i++){
         for(unsigned int j=0;j<elements_numbers.get_elements_number_in_depth();j++){
             for(unsigned int k=0;k<elements_numbers.get_elements_number_in_width();k++){
-                this->block_elements_pointers[i][j][k]=block_elements_pointers[vector_index];
+                this->block_elements_pointers[i][j][k]=block_elements_pointers[vector_index].get();
                 vector_index++;
             }
         }
@@ -37,7 +38,10 @@ Simple_Block::Simple_Block(const vector<vector<vector<std::shared_ptr<Insertable
         calculate_block_size(block_elements_pointers).get_width(),
         calculate_block_size(block_elements_pointers).get_depth(),
         calculate_block_size(block_elements_pointers).get_height()
-        ), block_elements_pointers(block_elements_pointers){
+        ){
+    vector<Insertable_Element*> row(block_elements_pointers[0][0].size(), nullptr);
+    vector<vector<Insertable_Element*>> layer(block_elements_pointers[0].size(),row);
+    this->block_elements_pointers=vector<vector<vector<Insertable_Element*>>>(block_elements_pointers.size(),layer);
 }
 
 void Simple_Block::rotate_in_x() {
@@ -69,9 +73,17 @@ bool Simple_Block::contains_element_with_id(unsigned int id) {
 }
 
 //TODO: trzeba zaimplementować wzorzec prototypu
-std::shared_ptr<Insertable_Element> Simple_Block::get_rotated_element() {
+shared_ptr<Insertable_Element> Simple_Block::get_rotated_element() {
 
     return nullptr;
+}
+
+void Simple_Block::accept(Visitor *visitor) {
+    visitor->visit(this);
+}
+
+vector<vector<vector<Insertable_Element*>>> Simple_Block::get_block_elements_pointers() {
+    return block_elements_pointers;
 }
 
 Element_3D calculate_block_size(const Element_3D &single_element,

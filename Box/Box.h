@@ -14,6 +14,7 @@ public:
     Box(const Box& other);
     std::shared_ptr<Insertable_Element> get_rotated_element() override;
     bool contains_element_with_id(unsigned int id) override;
+    void accept(Visitor *visitor) override;
 };
 
 

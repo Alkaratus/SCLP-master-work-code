@@ -10,8 +10,6 @@
 #include "Insertable_Element.h"
 
 class Elements_Group {
-
-
     std::vector<Insertable_Element*>elements_pointers;
 public:
     explicit Elements_Group(const std::list<Insertable_Element *>& elements_pointers);

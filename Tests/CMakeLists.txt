@@ -11,7 +11,7 @@ add_library(Test "Test.h" "Test.cpp")
 add_executable(Tests "main.cpp")
 
 
-target_link_libraries(Test PUBLIC Insertable_Element)
+target_link_libraries(Test PUBLIC Box)
 
 target_link_libraries(Tests PRIVATE Catch2::Catch2WithMain)
 target_link_libraries(Tests PUBLIC Test)

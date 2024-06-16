@@ -350,10 +350,7 @@ shared_ptr<Container::Free_Space>Container::create_merge_in_z(const shared_ptr<F
     return nullptr;
 }
 
-
 /// Internal functions
-
-
 
 bool is_first_anchor_smaller_than_second(std::array<unsigned int,3> first, std::array<unsigned int,3> second){
     if(first[0]!=second[0]){

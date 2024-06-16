@@ -40,7 +40,7 @@ shared_ptr<Container::Free_Space> Container::Free_Space::get_slice_on_left_from(
     if(slice_width==0){
         return nullptr;
     }
-    return std::make_shared<Container::Free_Space>(get_start_corner(), slice_width, get_depth(),
+    return make_shared<Container::Free_Space>(get_start_corner(), slice_width, get_depth(),
                                                    get_height(), owner);
 }
 
@@ -51,7 +51,7 @@ shared_ptr<Container::Free_Space> Container::Free_Space::get_slice_on_right_from
     }
     auto new_free_space_start=get_start_corner();
     new_free_space_start.set_x(point_x_value);
-    return std::make_shared<Container::Free_Space>(new_free_space_start, slice_width,get_depth(),
+    return make_shared<Container::Free_Space>(new_free_space_start, slice_width,get_depth(),
                                                    get_height(), owner);
 }
 
@@ -60,7 +60,7 @@ shared_ptr<Container::Free_Space> Container::Free_Space::get_slice_on_front_from
     if(slice_depth==0){
         return nullptr;
     }
-    return std::make_shared<Container::Free_Space>(get_start_corner(), get_width(), slice_depth,
+    return make_shared<Container::Free_Space>(get_start_corner(), get_width(), slice_depth,
                                                    get_height(), owner);
 }
 
@@ -71,7 +71,7 @@ shared_ptr<Container::Free_Space> Container::Free_Space::get_slice_on_back_from(
     }
     auto new_free_space_start=get_start_corner();
     new_free_space_start.set_z(point_z_value);
-    return std::make_shared<Container::Free_Space>(new_free_space_start, get_width(), slice_depth,
+    return make_shared<Container::Free_Space>(new_free_space_start, get_width(), slice_depth,
                                                    get_height(), owner);
 }
 
@@ -118,8 +118,7 @@ list<std::shared_ptr<Container::Free_Space>> Container::Free_Space::add_free_spa
     return created_free_spaces;
 }
 
-list<shared_ptr<Container::Free_Space>>
-Container::Free_Space::create_free_space_from_related_free_spaces(Insertion_Coordinates inserted_element_coordinates) {
+list<shared_ptr<Container::Free_Space>>Container::Free_Space::create_free_space_from_related_free_spaces(Insertion_Coordinates inserted_element_coordinates) {
     list<shared_ptr<Container::Free_Space>> new_free_spaces;
     auto insertion_wider_point= inserted_element_coordinates.get_wider_point();
     auto insertion_deeper_point=inserted_element_coordinates.get_deeper_point();

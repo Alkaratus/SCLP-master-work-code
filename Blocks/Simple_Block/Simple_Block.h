@@ -11,14 +11,17 @@
 #include "Block_Elements_Numbers.h"
 
 class Simple_Block: public Insertable_Element{
-    std::vector<std::vector<std::vector<std::shared_ptr<Insertable_Element>>>>block_elements_pointers;
+    std::vector<std::vector<std::vector<Insertable_Element*>>>block_elements_pointers;
 public:
     explicit Simple_Block(const std::vector<std::vector<std::vector<std::shared_ptr<Insertable_Element>>>>&block_elements_pointers);
-    Simple_Block(std::vector<std::shared_ptr<Insertable_Element>> block_elements_pointers, const Block_Elements_Numbers &elements_numbers);
+    Simple_Block(std::vector<std::shared_ptr<Insertable_Element>> &block_elements_pointers, const Block_Elements_Numbers &elements_numbers);
     void rotate_in_x();
     void rotate_in_z();
+    std::vector<std::vector<std::vector<Insertable_Element*>>>get_block_elements_pointers();
     std::shared_ptr<Insertable_Element> get_rotated_element() override;
     bool contains_element_with_id(unsigned int id) override;
+
+    void accept(Visitor *packer) override;
 };
 
 Element_3D calculate_block_size(const Element_3D& single_element_dimensions, const Block_Elements_Numbers& elements_numbers);

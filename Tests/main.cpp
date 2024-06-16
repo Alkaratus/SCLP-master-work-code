@@ -3,7 +3,7 @@
 //
 
 #include <catch2/catch_test_macros.hpp>
-#include "Insertable_Element.h"
+#include "Box.h"
 #include "Test.h"
 
 Test test;
@@ -18,7 +18,7 @@ TEST_CASE("Rotate Insertable Element"){
 }
 
 TEST_CASE("Get Insertable Element Rotation"){
-    Insertable_Element element(1,2,3);
+    Box element(1,2,3);
     auto rotated=element.get_rotated_element();
     REQUIRE(rotated->get_width()==element.get_depth());
     REQUIRE(rotated->get_depth()==element.get_width());

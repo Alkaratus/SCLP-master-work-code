@@ -5,6 +5,7 @@
 #ifndef MASTERS_WORK_INSERTABLE_ELEMENT_H
 #define MASTERS_WORK_INSERTABLE_ELEMENT_H
 
+class Visitor;
 
 #include <memory>
 #include "Element_3D.h"
@@ -23,10 +24,12 @@ public:
     [[nodiscard]] std::string get_properties() const override;
     virtual bool contains_element_with_id(unsigned int id)=0;
 
+    virtual void accept(Visitor *packer);
     friend class Test;
 };
 
 bool compare_elements_by_id(const Insertable_Element &first, const Insertable_Element &second);
+bool compare_elements_by_lengths(const Insertable_Element &first, const Insertable_Element &second);
 
 bool operator==(const Insertable_Element &first, const Insertable_Element &second);
 bool operator!=(const Insertable_Element &first, const Insertable_Element &second);

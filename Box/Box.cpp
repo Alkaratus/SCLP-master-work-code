@@ -3,6 +3,7 @@
 //
 
 #include "Box.h"
+#include "../Visitor/Visitor.h"
 
 Box::Box(unsigned int width, unsigned int depth, unsigned int height) : Insertable_Element(width, depth, height){
 
@@ -20,3 +21,8 @@ Box::Box(const Box &other): Insertable_Element(other) {
 bool Box::contains_element_with_id(unsigned int id) {
     return false;
 }
+
+void Box::accept(Visitor *visitor) {
+    visitor->visit(this);
+}
+

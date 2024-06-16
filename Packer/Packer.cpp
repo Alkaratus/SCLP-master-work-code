@@ -8,22 +8,21 @@
 #include <climits>
 #include <iostream>
 
-using std::list;
+using std::list, std::shared_ptr, std::vector;
 
 void get_next_possible_block_elements_numbers(Block_Elements_Numbers &current, unsigned int max_number_of_elements);
-
-list<Simple_Block> create_all_combinations_of_elements_blocks_for_numbers(const Elements_Group& group,Block_Elements_Numbers block_elements_numbers);
+list<shared_ptr<Simple_Block>> create_all_combinations_of_elements_blocks_for_numbers(const Elements_Group& group,Block_Elements_Numbers block_elements_numbers);
 
 const unsigned int FILL_SCALE=100;
 const unsigned int MIN_FILL_RATIO=100;
 
-Packer::Packer(const std::list<Box>& boxes, const Container& container):container(container),
+Packer::Packer(const list<Box>& boxes, const Container& container):container(container),
 max_number_of_simple_blocks(UINT_MAX),max_number_of_complex_block_merges(UINT_MAX),min_fill_ratio(MIN_FILL_RATIO) {
     for(auto &box:boxes){
         elements.emplace_back(std::make_unique<Box>(box));
     }
     create_elements_rotations();
-    //group_elements_in_list(elements);
+    create_blocks();
 }
 
 void Packer::create_elements_rotations() {
@@ -35,7 +34,6 @@ void Packer::create_elements_rotations() {
         }
     }
     elements.merge(rotations);
-    // TODO: we need kind of sorting function
 }
 
 void Packer::pack() {
@@ -45,7 +43,7 @@ void Packer::pack() {
         auto element= select_element(free_space);
         if(element!= nullptr){
             container.insert_element_into_free_space(free_space_iterator,element);
-            delete_elements_with_id(element->get_id());
+            delete_element(element);
         }
         else{
             container.remove_free_space(*free_space_iterator);
@@ -69,43 +67,91 @@ Insertable_Element *Packer::select_element(Free_Space &selected_free_space) cons
     return best_fill_element;
 }
 
-void Packer::delete_elements_containing_element_with_id(unsigned int id) {
 
+
+void Packer::create_blocks() {
+    elements.sort(compare_elements_ptr_by_lengths);
+    auto groups=group_elements_in_list(elements);
+    auto simple_blocks=create_simple_blocks(groups);
+    elements.insert(elements.end(),simple_blocks.begin(),simple_blocks.end());
 }
 
-void Packer::delete_elements_with_id(unsigned int id) {
-    for (auto iterator=elements.begin();iterator!=elements.end();iterator++){
-        if((*iterator)->get_id()==id){
-            iterator=elements.erase(iterator);
+void Packer::delete_element(Insertable_Element *element) {
+    element->accept(this);
+}
+
+void Packer::visit(Box *box) {
+    auto it=elements.begin();
+    auto element_to_delete=elements.begin();
+    while(it!=elements.end()){
+        if(it->get()->contains_element_with_id(box->get_id())){
+            auto deleted_element=*it;
+            auto deref_box= *box;
+            it=elements.erase(it);
+        }
+        else if(it->get()->get_id()==box->get_id()){
+            element_to_delete=it;
+            it++;
+        }
+        else{
+            it++;
         }
     }
+    elements.erase(element_to_delete);
 }
 
-std::list<Elements_Group>group_elements_in_list(const std::list<std::unique_ptr<Insertable_Element>> &elements) {
+void Packer::visit(Simple_Block *block) {
+    auto block_elements=block->get_block_elements_pointers();
+    auto it=elements.begin();
+    auto element_to_delete=elements.begin();
+    while(it!=elements.end()){
+        if(it->get()->contains_element_with_id(block->get_id())){
+            it=elements.erase(it);
+        }
+        else if(it->get()->get_id()==block->get_id()){
+            element_to_delete=it;
+            it++;
+        }
+        else{
+            it++;
+        }
+    }
+    elements.erase(element_to_delete);
+    for(auto &layer:block_elements){
+        for(auto &row:layer){
+            for(auto &element:row){
+                delete_element(element);
+            }
+        }
+    }
+
+}
+
+list<Elements_Group>group_elements_in_list(const list<std::shared_ptr<Insertable_Element>> &elements) {
     list<Elements_Group> groups;
     auto compared_element= elements.begin();
-    list<unsigned int>elements_IDs;
-    elements_IDs.emplace_back((*compared_element)->get_id());
+    list<Insertable_Element*>elements_IDs;
+    elements_IDs.emplace_back(compared_element->get());
     for(auto iter=(++elements.begin());iter!=elements.end();iter++){
-        if((*compared_element)!=(*iter)){
-            //groups.emplace_back(elements_IDs,*compared_element);
+        if((**compared_element)!=(**iter)){
+            groups.emplace_back(elements_IDs);
             elements_IDs.clear();
             compared_element=iter;
         }
-        elements_IDs.emplace_back((*iter)->get_id());
+        elements_IDs.emplace_back(iter->get());
     }
     return groups;
 }
 
-list<Simple_Block>create_simple_blocks(const list<Elements_Group> &groups){
-    list<Simple_Block> possible_simple_blocks;
+list<shared_ptr<Simple_Block>>create_simple_blocks(const list<Elements_Group> &groups){
+    list<shared_ptr<Simple_Block>> possible_simple_blocks;
     for(auto &group:groups){
         const auto& group_elements_IDs=group.get_elements_pointers();
         Block_Elements_Numbers block_elements_numbers(2,1,1);
-        while(block_elements_numbers.get_elements_number_in_block()<group_elements_IDs.size()){
-            //auto combinations=create_all_combinations_of_elements_blocks_for_numbers(group,block_elements_numbers);
-            //possible_simple_blocks.insert( possible_simple_blocks.cbegin(),std::make_move_iterator(combinations.begin()),
-            //                               std::make_move_iterator(combinations.end()));
+        while(block_elements_numbers.get_elements_number_in_block()<=group_elements_IDs.size()){
+            auto combinations=create_all_combinations_of_elements_blocks_for_numbers(group,block_elements_numbers);
+            possible_simple_blocks.insert( possible_simple_blocks.cend(),std::make_move_iterator(combinations.begin()),
+                                         std::make_move_iterator(combinations.end()));
             get_next_possible_block_elements_numbers(block_elements_numbers,group_elements_IDs.size());
         }
     }
@@ -137,6 +183,10 @@ list<Complex_Block> create_complex_block(const list<Elements_Group> &groups) {
     return possible_complex_blocks;
 }
 
+bool compare_elements_ptr_by_lengths(const shared_ptr<Insertable_Element>& first, const shared_ptr<Insertable_Element>& second) {
+    return compare_elements_by_lengths(*first,*second);
+}
+
 void get_next_possible_block_elements_numbers(Block_Elements_Numbers &current, unsigned int max_number_of_elements) {
     current.set_elements_number_in_width(current.get_elements_number_in_width()+1);
     if(current.get_elements_number_in_block()>max_number_of_elements){
@@ -150,44 +200,48 @@ void get_next_possible_block_elements_numbers(Block_Elements_Numbers &current, u
     }
 }
 
-/*list<Simple_Block> create_all_combinations_of_elements_blocks_for_numbers(const Elements_Group& group,Block_Elements_Numbers block_elements_numbers){
-    list<Simple_Block> combinations;
+list<shared_ptr<Simple_Block>> create_all_combinations_of_elements_blocks_for_numbers(const Elements_Group& group,Block_Elements_Numbers block_elements_numbers){
+    list<std::shared_ptr<Simple_Block>> combinations;
     auto elements=group.get_elements_pointers();
-    auto slice=std::vector(elements.begin(),elements.begin()+block_elements_numbers.get_elements_number_in_block());
-
-    combinations.emplace_back(std::make_shared<Simple_Block>(slice,block_elements_numbers));
+    unsigned int i=0;
     bool width_and_depth_different=block_elements_numbers.get_elements_number_in_width()!=block_elements_numbers.get_elements_number_in_depth();
     bool depth_and_height_different=block_elements_numbers.get_elements_number_in_height()!=block_elements_numbers.get_elements_number_in_depth();
-    if(width_and_depth_different){
-        combinations.emplace_back(slice,Block_Elements_Numbers(
-                block_elements_numbers.get_elements_number_in_depth(),
-                block_elements_numbers.get_elements_number_in_width(),
-                block_elements_numbers.get_elements_number_in_height())
-        );
-        combinations.emplace_back(slice,Block_Elements_Numbers(
-                block_elements_numbers.get_elements_number_in_depth(),
-                block_elements_numbers.get_elements_number_in_height(),
-                block_elements_numbers.get_elements_number_in_width())
-        );
-    }
-    if(depth_and_height_different){
-        combinations.emplace_back(slice,Block_Elements_Numbers(
-                block_elements_numbers.get_elements_number_in_width(),
-                block_elements_numbers.get_elements_number_in_height(),
-                block_elements_numbers.get_elements_number_in_depth())
-        );
-        combinations.emplace_back(slice,Block_Elements_Numbers(
-                block_elements_numbers.get_elements_number_in_height(),
-                block_elements_numbers.get_elements_number_in_width(),
-                block_elements_numbers.get_elements_number_in_depth())
-        );
-    }
-    if(width_and_depth_different&&depth_and_height_different){
-        combinations.emplace_back(slice,Block_Elements_Numbers(
-                block_elements_numbers.get_elements_number_in_height(),
-                block_elements_numbers.get_elements_number_in_depth(),
-                block_elements_numbers.get_elements_number_in_width())
-        );
-    }
+    do{
+        auto slice=vector<shared_ptr<Insertable_Element>>(elements.begin()+i,elements.begin()+i+block_elements_numbers.get_elements_number_in_block());
+        combinations.emplace_back(std::make_shared<Simple_Block>(slice,block_elements_numbers));
+        if(width_and_depth_different){
+            combinations.emplace_back(std::make_shared<Simple_Block>(slice,Block_Elements_Numbers(
+                    block_elements_numbers.get_elements_number_in_depth(),
+                    block_elements_numbers.get_elements_number_in_width(),
+                    block_elements_numbers.get_elements_number_in_height()))
+            );
+            combinations.emplace_back(std::make_shared<Simple_Block>(slice,Block_Elements_Numbers(
+                    block_elements_numbers.get_elements_number_in_depth(),
+                    block_elements_numbers.get_elements_number_in_height(),
+                    block_elements_numbers.get_elements_number_in_width()))
+            );
+        }
+        if(depth_and_height_different){
+            combinations.emplace_back(std::make_shared<Simple_Block>(slice,Block_Elements_Numbers(
+                    block_elements_numbers.get_elements_number_in_width(),
+                    block_elements_numbers.get_elements_number_in_height(),
+                    block_elements_numbers.get_elements_number_in_depth()))
+            );
+            combinations.emplace_back(std::make_shared<Simple_Block>(slice,Block_Elements_Numbers(
+                    block_elements_numbers.get_elements_number_in_height(),
+                    block_elements_numbers.get_elements_number_in_width(),
+                    block_elements_numbers.get_elements_number_in_depth()))
+            );
+        }
+        if(width_and_depth_different&&depth_and_height_different){
+            combinations.emplace_back(std::make_shared<Simple_Block>(slice,Block_Elements_Numbers(
+                    block_elements_numbers.get_elements_number_in_height(),
+                    block_elements_numbers.get_elements_number_in_depth(),
+                    block_elements_numbers.get_elements_number_in_width()))
+            );
+        }
+        i+=block_elements_numbers.get_elements_number_in_block();
+    }while(i+block_elements_numbers.get_elements_number_in_block()<=elements.size());
+
     return combinations;
-}*/
+}
