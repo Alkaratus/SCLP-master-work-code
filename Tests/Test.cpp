@@ -3,10 +3,10 @@
 //
 
 #include "Test.h"
-#include "Insertable_Element.h"
+#include "Box.h"
 
 bool Test::test_insertable_element_rotation() {
-    Insertable_Element element(3,2,1);
+    Box element(3,2,1);
     auto width_before_rotation=element.get_width();
     auto depth_before_rotation= element.get_depth();
     auto height_before_rotation=element.get_height();

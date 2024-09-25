@@ -19,7 +19,9 @@ protected:
     void rotate();
 public:
     Insertable_Element(unsigned int width, unsigned int depth, unsigned int height);
-    virtual std::shared_ptr<Insertable_Element> get_rotated_element()=0;
+    virtual ~Insertable_Element()=default;
+    
+    virtual std::shared_ptr<Insertable_Element> get_element_rotated_in_y()=0;
     [[nodiscard]] unsigned int get_id() const;
     [[nodiscard]] std::string get_properties() const override;
     virtual bool contains_element_with_id(unsigned int id)=0;

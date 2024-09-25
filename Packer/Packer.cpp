@@ -1,11 +1,6 @@
-//
-// Created by kubam on 08.03.2024.
-//
-
 #include "Packer.h"
 
 #include <utility>
-#include <climits>
 #include <iostream>
 
 using std::list, std::shared_ptr, std::vector;
@@ -14,10 +9,8 @@ void get_next_possible_block_elements_numbers(Block_Elements_Numbers &current, u
 list<shared_ptr<Simple_Block>> create_all_combinations_of_elements_blocks_for_numbers(const Elements_Group& group,Block_Elements_Numbers block_elements_numbers);
 
 const unsigned int FILL_SCALE=100;
-const unsigned int MIN_FILL_RATIO=100;
 
-Packer::Packer(const list<Box>& boxes, const Container& container):container(container),
-max_number_of_simple_blocks(UINT_MAX),max_number_of_complex_block_merges(UINT_MAX),min_fill_ratio(MIN_FILL_RATIO) {
+Packer::Packer(const list<Box>& boxes, const Container& container):container(container){
     for(auto &box:boxes){
         elements.emplace_back(std::make_unique<Box>(box));
     }
@@ -26,9 +19,9 @@ max_number_of_simple_blocks(UINT_MAX),max_number_of_complex_block_merges(UINT_MA
 }
 
 void Packer::create_elements_rotations() {
-    std::list<std::shared_ptr<Insertable_Element>>rotations;
+    list<std::shared_ptr<Insertable_Element>>rotations;
     for(auto const &element:elements){
-        auto rotated=element->get_rotated_element();
+        auto rotated= element->get_element_rotated_in_y();
         if((*rotated)!=(*element) && (!container.cant_element_be_inserted(rotated.get()))){
             rotations.emplace_back(std::move(rotated));
         }
@@ -36,13 +29,14 @@ void Packer::create_elements_rotations() {
     elements.merge(rotations);
 }
 
-void Packer::pack() {
-    while((!elements.empty())&&(container.have_free_space_aveable())){
+list<std::unique_ptr<A_Insertion_Coordinates>> Packer::pack() {
+    list<std::unique_ptr<A_Insertion_Coordinates>> packing_coordinates;
+    while((!elements.empty())&&(container.have_free_space_available())){
         auto free_space_iterator=container.select_free_space();
         auto free_space=*(*free_space_iterator);
         auto element= select_element(free_space);
         if(element!= nullptr){
-            container.insert_element_into_free_space(free_space_iterator,element);
+            packing_coordinates.emplace_back(container.insert_element_into_free_space(free_space_iterator,element));
             delete_element(element);
         }
         else{
@@ -50,6 +44,7 @@ void Packer::pack() {
         }
         std::cout<<container.get_text_list_of_free_spaces()<<std::endl;
     }
+    return packing_coordinates;
 }
 
 Insertable_Element *Packer::select_element(Free_Space &selected_free_space) const{
@@ -66,8 +61,6 @@ Insertable_Element *Packer::select_element(Free_Space &selected_free_space) cons
     }
     return best_fill_element;
 }
-
-
 
 void Packer::create_blocks() {
     elements.sort(compare_elements_ptr_by_lengths);
@@ -200,14 +193,15 @@ void get_next_possible_block_elements_numbers(Block_Elements_Numbers &current, u
     }
 }
 
-list<shared_ptr<Simple_Block>> create_all_combinations_of_elements_blocks_for_numbers(const Elements_Group& group,Block_Elements_Numbers block_elements_numbers){
+list<shared_ptr<Simple_Block>> create_all_combinations_of_elements_blocks_for_numbers(const Elements_Group& group, const Block_Elements_Numbers block_elements_numbers){
     list<std::shared_ptr<Simple_Block>> combinations;
     auto elements=group.get_elements_pointers();
     unsigned int i=0;
     bool width_and_depth_different=block_elements_numbers.get_elements_number_in_width()!=block_elements_numbers.get_elements_number_in_depth();
     bool depth_and_height_different=block_elements_numbers.get_elements_number_in_height()!=block_elements_numbers.get_elements_number_in_depth();
     do{
-        auto slice=vector<shared_ptr<Insertable_Element>>(elements.begin()+i,elements.begin()+i+block_elements_numbers.get_elements_number_in_block());
+        auto slice=vector<Insertable_Element*>(elements.begin()+i,elements.begin()+i+block_elements_numbers.get_elements_number_in_block());
+
         combinations.emplace_back(std::make_shared<Simple_Block>(slice,block_elements_numbers));
         if(width_and_depth_different){
             combinations.emplace_back(std::make_shared<Simple_Block>(slice,Block_Elements_Numbers(

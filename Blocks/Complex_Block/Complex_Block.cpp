@@ -2,21 +2,22 @@
 // Created by kubam on 12.03.2024.
 //
 
+#include <algorithm>
 #include "Complex_Block.h"
 
-Complex_Block::Complex_Block(const std::vector <Insertable_Element*>& block_elements, axis merge_axis):
-Insertable_Element(calculate_block_size(block_elements,merge_axis).get_width(),
+Complex_Block::Complex_Block(const std::vector<Insertable_Element*>&block_elements,axis merge_axis):
+Block(calculate_block_size(block_elements,merge_axis).get_width(),
                    calculate_block_size(block_elements,merge_axis).get_depth(),
                    calculate_block_size(block_elements,merge_axis).get_height()), merge_axis(merge_axis) {
 }
 
-//TODO: do zrobienia
 bool Complex_Block::contains_element_with_id(unsigned int id) {
-    return false;
+    return std::any_of(block_elements_IDs.begin(),block_elements_IDs.end(),
+                [id](Insertable_Element* element){return id==element->get_id();});
 }
 
 //TODO: trzeba zaimplementować wzorzec prototypu
-std::shared_ptr<Insertable_Element> Complex_Block::get_rotated_element() {
+std::shared_ptr<Insertable_Element> Complex_Block::get_element_rotated_in_y() {
     return nullptr;
 }
 

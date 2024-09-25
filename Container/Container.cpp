@@ -141,13 +141,13 @@ Container::get_last_element_with_same_y_after(list<shared_ptr<Free_Space>>::iter
     return last_free_space;
 }
 
-Insertion_Coordinates Container::insert_element_into_free_space(list<shared_ptr<Container::Free_Space>>::iterator free_space,
+std::unique_ptr<A_Insertion_Coordinates> Container::insert_element_into_free_space(list<shared_ptr<Container::Free_Space>>::iterator free_space,
                                                Insertable_Element *element) {
     auto insertion_coordinates=free_space->get()->get_insertion_coordinates_for_element(element);
-    auto free_space_above=free_space->get()->create_free_space_above_inserted_element(insertion_coordinates);
+    auto free_space_above=free_space->get()->create_free_space_above_inserted_element(insertion_coordinates.get());
 
-    auto free_spaces_on_sides=free_space->get()->add_free_spaces_on_sides_of_inserted_element(insertion_coordinates);
-    auto related_free_spaces=free_space->get()->create_free_space_from_related_free_spaces(insertion_coordinates);
+    auto free_spaces_on_sides=free_space->get()->add_free_spaces_on_sides_of_inserted_element(insertion_coordinates.get());
+    auto related_free_spaces=free_space->get()->create_free_space_from_related_free_spaces(insertion_coordinates.get());
 
     remove_free_space(*free_space);
 
@@ -180,7 +180,7 @@ void Container::remove_free_space(shared_ptr<Free_Space> &space) {
             for(const auto& related_free_space:related_free_spaces){
                 related_free_space->remove_related_free_space(*it);
             }
-            free_spaces.erase(it);
+            auto next=free_spaces.erase(it);
             return;
         }
     }
@@ -194,7 +194,7 @@ std::string Container::get_text_list_of_free_spaces() {
     return list;
 }
 
-bool Container::have_free_space_aveable() {
+bool Container::have_free_space_available() {
     return (!free_spaces.empty());
 }
 
@@ -361,4 +361,3 @@ bool is_first_anchor_smaller_than_second(std::array<unsigned int,3> first, std::
     }
     return first[2]<second[2];
 }
-

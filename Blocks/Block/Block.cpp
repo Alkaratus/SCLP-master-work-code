@@ -3,3 +3,7 @@
 //
 
 #include "Block.h"
+
+Block::Block(unsigned int width, unsigned int depth, unsigned int height) : Insertable_Element(width, depth, height) {
+
+}

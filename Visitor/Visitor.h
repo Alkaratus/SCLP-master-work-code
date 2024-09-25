@@ -7,6 +7,7 @@
 
 class Box;
 class Simple_Block;
+class Complex_Block;
 
 
 class Visitor {
@@ -14,6 +15,8 @@ public:
     virtual void visit(Box *box){};
 
     virtual void visit(Simple_Block *block){};
+
+    virtual void visit(Complex_Block *block){};
 };
 
 

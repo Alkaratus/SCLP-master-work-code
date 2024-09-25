@@ -2,37 +2,37 @@
 // Created by kubam on 23.05.2024.
 //
 
-#include "Container.h"
 #include <algorithm>
-#include <iostream>
+#include "Container.h"
+#include "Insertion_Coordinates_Factory.h"
 
 using std::list, std::shared_ptr, std::make_shared;
 
 std::array<unsigned int,3> calculate_anchor_distance(const Point_3D &first,const Point_3D &second);
-bool is_first_anchor_smaller_than_second(std::array<unsigned int,3> first, std::array<unsigned int,3> second);
+
 
 shared_ptr<Container::Free_Space> Container::Anchored_Free_Space::create_free_space_above_inserted_element(
-        const Insertion_Coordinates &inserted_element_coordinates) {
-    auto insertion_start_point = inserted_element_coordinates.get_start_point();
-    auto inserted_element = inserted_element_coordinates.get_inserted_element();
-    return make_shared<Container::Anchored_Free_Space>(Point_3D(insertion_start_point.get_x(),insertion_start_point.get_y()+inserted_element->get_height(),insertion_start_point.get_z()),
-                                                       inserted_element->get_width(),inserted_element->get_depth(),
-                                                       get_height()-inserted_element->get_height(),get_owner());
+        const A_Insertion_Coordinates *inserted_element_coordinates) {
+    auto insertion_start_point = inserted_element_coordinates->get_start_point();
+    auto inserted_element = inserted_element_coordinates->get_sizes();
+    return make_shared<Container::Anchored_Free_Space>(Point_3D(insertion_start_point.get_x(),insertion_start_point.get_y()+inserted_element.get_height(),insertion_start_point.get_z()),
+                                                       inserted_element.get_width(),inserted_element.get_depth(),
+                                                       get_height()-inserted_element.get_height(),get_owner());
 }
 
-list<shared_ptr<Container::Free_Space>> Container::Anchored_Free_Space::add_free_spaces_on_sides_of_inserted_element(Insertion_Coordinates &inserted_element_coordinates) {
+list<shared_ptr<Container::Free_Space>> Container::Anchored_Free_Space::add_free_spaces_on_sides_of_inserted_element(A_Insertion_Coordinates *inserted_element_coordinates) {
     list<shared_ptr<Container::Free_Space>> created_free_spaces;
-    auto insertion_start_point = inserted_element_coordinates.get_start_point();
-    auto inserted_element = inserted_element_coordinates.get_inserted_element();
+    auto insertion_start_point = inserted_element_coordinates->get_start_point();
+    auto inserted_element = inserted_element_coordinates->get_sizes();
     auto free_space_anchor_type=anchor_place;
     if(free_space_anchor_type==start || free_space_anchor_type==wider){
-        created_free_spaces.emplace_back(get_slice_on_back_from(insertion_start_point.get_z()+inserted_element->get_depth()));
+        created_free_spaces.emplace_back(get_slice_on_back_from(insertion_start_point.get_z()+inserted_element.get_depth()));
     }
     else{
         created_free_spaces.emplace_back(get_slice_on_front_from(insertion_start_point.get_z()));
     }
     if(free_space_anchor_type==start || free_space_anchor_type==deeper){
-        created_free_spaces.emplace_back(get_slice_on_right_from(insertion_start_point.get_x()+inserted_element->get_width()));
+        created_free_spaces.emplace_back(get_slice_on_right_from(insertion_start_point.get_x()+inserted_element.get_width()));
     }
     else{
         created_free_spaces.emplace_back(get_slice_on_left_from(insertion_start_point.get_x()));
@@ -42,12 +42,12 @@ list<shared_ptr<Container::Free_Space>> Container::Anchored_Free_Space::add_free
     return created_free_spaces;
 }
 
-list<shared_ptr<Container::Free_Space>> Container::Anchored_Free_Space::create_free_space_from_related_free_spaces(Insertion_Coordinates inserted_element_coordinates) {
+list<shared_ptr<Container::Free_Space>> Container::Anchored_Free_Space::create_free_space_from_related_free_spaces(A_Insertion_Coordinates *inserted_element_coordinates) {
     list<shared_ptr<Container::Free_Space>> new_free_spaces;
-    auto insertion_start_point=inserted_element_coordinates.get_start_point();
-    auto insertion_wider_point= inserted_element_coordinates.get_wider_point();
-    auto insertion_deeper_point=inserted_element_coordinates.get_deeper_point();
-    auto insertion_end_point=inserted_element_coordinates.get_end_point();
+    auto insertion_start_point=inserted_element_coordinates->get_start_point();
+    auto insertion_wider_point= inserted_element_coordinates->get_wider_point();
+    auto insertion_deeper_point=inserted_element_coordinates->get_deeper_point();
+    auto insertion_end_point=inserted_element_coordinates->get_end_point();
 
     auto related_free_spaces=get_related_free_spaces();
     for(auto &related_free_space: related_free_spaces){
@@ -124,23 +124,24 @@ Point_3D Container::Anchored_Free_Space::get_anchor_corner() {
     return anchor_corner;
 }
 
-Insertion_Coordinates Container::Anchored_Free_Space::get_insertion_coordinates_for_element(Insertable_Element *element) {
+std::unique_ptr<A_Insertion_Coordinates> Container::Anchored_Free_Space::get_insertion_coordinates_for_element(Insertable_Element *element) {
     auto anchor=get_anchor_corner();
+    Insertion_Coordinates_Factory factory;
     switch(anchor_place){
         case start:{
-            return {element,anchor};
+            return factory.create_insertion_coordinate(element,anchor);
         }
         case wider: {
-            return {element,Point_3D(anchor.get_x()-element->get_width(),
-                                     anchor.get_y(),anchor.get_z())};
+            return factory.create_insertion_coordinate(element,Point_3D(anchor.get_x()-element->get_width(),
+                                                                        anchor.get_y(),anchor.get_z()));
         }
         case deeper:{
-            return {element,Point_3D(anchor.get_x(),anchor.get_y(),
-                                     anchor.get_z()-element->get_depth())};
+            return factory.create_insertion_coordinate(element,Point_3D(anchor.get_x(),anchor.get_y(),
+                                                                        anchor.get_z()-element->get_depth()));
         }
         case end:{
-            return {element,Point_3D(anchor.get_x()-element->get_width(),anchor.get_y(),
-                                     anchor.get_z()-element->get_depth()) };
+            return factory.create_insertion_coordinate(element,Point_3D(anchor.get_x()-element->get_width(),anchor.get_y(),
+                                                                        anchor.get_z()-element->get_depth()));
         }
     }
 }

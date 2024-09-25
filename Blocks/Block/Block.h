@@ -5,9 +5,11 @@
 #ifndef MASTERS_WORK_BLOCK_H
 #define MASTERS_WORK_BLOCK_H
 
+#include "Insertable_Element.h"
 
-class Block {
-
+class Block: public Insertable_Element {
+public:
+    Block(unsigned int width, unsigned int depth, unsigned int height);
 };
 
 

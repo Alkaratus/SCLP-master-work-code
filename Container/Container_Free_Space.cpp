@@ -3,6 +3,7 @@
 //
 
 #include "Container.h"
+#include "Insertion_Coordinates_Factory.h"
 #include <algorithm>
 #include <iostream>
 
@@ -31,8 +32,9 @@ void Container::Free_Space::remove_related_free_space(const shared_ptr<Free_Spac
     }
 }
 
-Insertion_Coordinates Container::Free_Space::get_insertion_coordinates_for_element(Insertable_Element *element) {
-    return {element,get_start_corner()};
+std::unique_ptr<A_Insertion_Coordinates> Container::Free_Space::get_insertion_coordinates_for_element(Insertable_Element *element) {
+    Insertion_Coordinates_Factory factory;
+    return factory.create_insertion_coordinate(element,get_start_corner());
 }
 
 shared_ptr<Container::Free_Space> Container::Free_Space::get_slice_on_left_from(unsigned int point_x_value) {
@@ -89,21 +91,21 @@ bool Container::Free_Space::do_point_affects(const Point_2D &point) {
            start_point.get_z()<point.get_z() && start_point.get_z()+get_depth()>=point.get_z();
 }
 
-shared_ptr<Container::Free_Space> Container::Free_Space::create_free_space_above_inserted_element(const Insertion_Coordinates &inserted_element_coordinates) {
-    auto insertion_start_point = inserted_element_coordinates.get_start_point();
-    auto inserted_element = inserted_element_coordinates.get_inserted_element();
-    auto space_height=get_height()-inserted_element->get_height();
+shared_ptr<Container::Free_Space> Container::Free_Space::create_free_space_above_inserted_element(const A_Insertion_Coordinates *inserted_element_coordinates) {
+    auto insertion_start_point = inserted_element_coordinates->get_start_point();
+    auto inserted_element = inserted_element_coordinates->get_sizes();
+    auto space_height=get_height()-inserted_element.get_height();
     if(space_height==0){
         return nullptr;
     }
-    return make_shared<Container::Free_Space>(Point_3D(insertion_start_point.get_x(),insertion_start_point.get_y()+inserted_element->get_height(),insertion_start_point.get_z()),
-                                              inserted_element->get_width(),inserted_element->get_depth(),
+    return make_shared<Container::Free_Space>(Point_3D(insertion_start_point.get_x(),insertion_start_point.get_y()+inserted_element.get_height(),insertion_start_point.get_z()),
+                                              inserted_element.get_width(),inserted_element.get_depth(),
                                               space_height,owner);
 }
 
-list<std::shared_ptr<Container::Free_Space>> Container::Free_Space::add_free_spaces_on_sides_of_inserted_element(Insertion_Coordinates &inserted_element_coordinates) {
+list<std::shared_ptr<Container::Free_Space>> Container::Free_Space::add_free_spaces_on_sides_of_inserted_element(A_Insertion_Coordinates *inserted_element_coordinates) {
     list<std::shared_ptr<Container::Free_Space>> created_free_spaces;
-    auto insertion_end_point= inserted_element_coordinates.get_end_point();
+    auto insertion_end_point= inserted_element_coordinates->get_end_point();
     auto first=get_slice_on_back_from(insertion_end_point.get_z());
     auto second=get_slice_on_right_from(insertion_end_point.get_x());
     if(first!= nullptr && second!= nullptr){
@@ -118,11 +120,11 @@ list<std::shared_ptr<Container::Free_Space>> Container::Free_Space::add_free_spa
     return created_free_spaces;
 }
 
-list<shared_ptr<Container::Free_Space>>Container::Free_Space::create_free_space_from_related_free_spaces(Insertion_Coordinates inserted_element_coordinates) {
+list<shared_ptr<Container::Free_Space>>Container::Free_Space::create_free_space_from_related_free_spaces(A_Insertion_Coordinates * inserted_element_coordinates) {
     list<shared_ptr<Container::Free_Space>> new_free_spaces;
-    auto insertion_wider_point= inserted_element_coordinates.get_wider_point();
-    auto insertion_deeper_point=inserted_element_coordinates.get_deeper_point();
-    auto insertion_end_point=inserted_element_coordinates.get_end_point();
+    auto insertion_wider_point= inserted_element_coordinates->get_wider_point();
+    auto insertion_deeper_point=inserted_element_coordinates->get_deeper_point();
+    auto insertion_end_point=inserted_element_coordinates->get_end_point();
     auto it=related_free_spaces.begin();
     while(it!=related_free_spaces.end()){
         bool related_free_space_affected=false;

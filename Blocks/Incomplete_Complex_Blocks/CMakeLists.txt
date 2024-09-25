@@ -1,4 +1,4 @@
-set (lib_name Simple_Block)
+set (lib_name Incomplete_Complex_Block)
 
 add_library(${lib_name} ${lib_name}.h ${lib_name}.cpp)
 

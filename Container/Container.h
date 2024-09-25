@@ -6,10 +6,11 @@
 #define MASTERS_WORK_CONTAINER_H
 
 #include <list>
+#include <array>
 #include "Element_3D.h"
 #include "Free_Space.h"
 #include "Insertable_Element.h"
-#include "Insertion_Coordinates.h"
+#include "A_Insertion_Coordinates.h"
 
 typedef Free_Space External_Free_Space;
 
@@ -34,7 +35,7 @@ class Container:public Element_3D {
         void add_related_free_space(const std::shared_ptr<Free_Space>& free_space);
         void remove_related_free_space(const std::shared_ptr<Free_Space>& free_space);
 
-        virtual Insertion_Coordinates get_insertion_coordinates_for_element(Insertable_Element *element);
+        virtual std::unique_ptr<A_Insertion_Coordinates> get_insertion_coordinates_for_element(Insertable_Element *element);
         virtual std::shared_ptr<Free_Space> get_slice_on_left_from(unsigned int point_x_value);
         virtual std::shared_ptr<Free_Space> get_slice_on_right_from(unsigned int point_x_value);
         virtual std::shared_ptr<Free_Space> get_slice_on_front_from(unsigned int point_z_value);
@@ -42,9 +43,9 @@ class Container:public Element_3D {
 
         bool do_point_affects(const Point_2D &point);
 
-        virtual std::shared_ptr<Free_Space> create_free_space_above_inserted_element(const Insertion_Coordinates &inserted_element_coordinates);
-        virtual std::list<std::shared_ptr<Free_Space>> add_free_spaces_on_sides_of_inserted_element(Insertion_Coordinates &inserted_element_coordinates);
-        virtual std::list<std::shared_ptr<Free_Space>> create_free_space_from_related_free_spaces(Insertion_Coordinates inserted_element_coordinates);
+        virtual std::shared_ptr<Free_Space> create_free_space_above_inserted_element(const A_Insertion_Coordinates *inserted_element_coordinates);
+        virtual std::list<std::shared_ptr<Free_Space>> add_free_spaces_on_sides_of_inserted_element(A_Insertion_Coordinates *inserted_element_coordinates);
+        virtual std::list<std::shared_ptr<Free_Space>> create_free_space_from_related_free_spaces(A_Insertion_Coordinates * inserted_element_coordinates);
 
         [[nodiscard]] std::string get_properties() const override;
     };
@@ -65,22 +66,22 @@ class Container:public Element_3D {
         anchor_place_type get_anchor_corner_type();
         Point_3D get_anchor_corner() override;
         [[nodiscard]] std::array<unsigned int,3>get_anchor_lengths() const override;
-        Insertion_Coordinates get_insertion_coordinates_for_element(Insertable_Element *element) override;
+        std::unique_ptr<A_Insertion_Coordinates>  get_insertion_coordinates_for_element(Insertable_Element *element) override;
 
         std::shared_ptr<Free_Space> get_slice_on_left_from(unsigned int point_x_value) override;
         std::shared_ptr<Free_Space> get_slice_on_right_from(unsigned int point_x_value) override;
         std::shared_ptr<Free_Space> get_slice_on_front_from(unsigned int point_z_value) override;
         std::shared_ptr<Free_Space> get_slice_on_back_from(unsigned int point_z_value) override;
 
-        std::shared_ptr<Free_Space> create_free_space_above_inserted_element(const Insertion_Coordinates &inserted_element_coordinates) override;
-        std::list<std::shared_ptr<Free_Space>> add_free_spaces_on_sides_of_inserted_element(Insertion_Coordinates &inserted_element_coordinates) override;
-        std::list<std::shared_ptr<Free_Space>> create_free_space_from_related_free_spaces(Insertion_Coordinates inserted_element_coordinates) override;
+        std::shared_ptr<Free_Space> create_free_space_above_inserted_element(const A_Insertion_Coordinates *inserted_element_coordinates) override;
+        std::list<std::shared_ptr<Free_Space>> add_free_spaces_on_sides_of_inserted_element(A_Insertion_Coordinates *inserted_element_coordinates) override;
+        std::list<std::shared_ptr<Free_Space>> create_free_space_from_related_free_spaces(A_Insertion_Coordinates *inserted_element_coordinates) override;
 
 
     };
 
-    std::list<std::shared_ptr<Free_Space>>free_spaces;
-    Element_3D element_max_sizes;
+    std::list<std::shared_ptr<Free_Space>>free_spaces; ///< Collection of free spaces
+    Element_3D element_max_sizes; ///
 
     static void add_relation_between_free_spaces(const std::shared_ptr<Free_Space>& first, const std::shared_ptr<Free_Space>& second);
 
@@ -97,9 +98,9 @@ class Container:public Element_3D {
 public:
     Container(unsigned int width,unsigned int depth,unsigned int height);
     Container(const Container& other);
-    bool have_free_space_aveable();
+    bool have_free_space_available();
     std::list<std::shared_ptr<Free_Space>>::iterator select_free_space();
-    Insertion_Coordinates insert_element_into_free_space(std::list<std::shared_ptr<Free_Space>>::iterator free_space,Insertable_Element* element);
+    std::unique_ptr<A_Insertion_Coordinates> insert_element_into_free_space(std::list<std::shared_ptr<Free_Space>>::iterator free_space,Insertable_Element* element);
     ///Checks if element can't be definitely inserted into container BUT it doesn't check can element be inserted
     bool cant_element_be_inserted(Insertable_Element* element);
     void remove_free_space(std::shared_ptr<Free_Space> &space);

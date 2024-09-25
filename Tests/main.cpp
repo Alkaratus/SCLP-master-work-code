@@ -19,7 +19,7 @@ TEST_CASE("Rotate Insertable Element"){
 
 TEST_CASE("Get Insertable Element Rotation"){
     Box element(1,2,3);
-    auto rotated=element.get_rotated_element();
+    auto rotated= element.get_element_rotated_in_y();
     REQUIRE(rotated->get_width()==element.get_depth());
     REQUIRE(rotated->get_depth()==element.get_width());
 }

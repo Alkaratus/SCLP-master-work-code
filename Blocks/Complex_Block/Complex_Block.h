@@ -6,7 +6,7 @@
 #define MASTERS_WORK_COMPLEX_BLOCK_H
 
 #include <vector>
-#include "Elements_Group.h"
+#include "Block.h"
 
 enum axis{
     X,//Axis of width
@@ -14,13 +14,12 @@ enum axis{
     Z //Axis of depth
 };
 
-//TODO: Trzeba zastanowić sie na modyfikację
-class Complex_Block: public Insertable_Element {
+class Complex_Block: public Block {
     std::vector<Insertable_Element*>block_elements_IDs;
     axis merge_axis;
 public:
-    Complex_Block(const std::vector<Insertable_Element*>&block_elements_IDs,axis merge_axis);
-    std::shared_ptr<Insertable_Element> get_rotated_element() override;
+    Complex_Block(const std::vector<Insertable_Element*>&block_elements,axis merge_axis);
+    std::shared_ptr<Insertable_Element> get_element_rotated_in_y() override;
     bool contains_element_with_id(unsigned int id) override;
 
 };
