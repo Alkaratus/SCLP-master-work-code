@@ -22,7 +22,6 @@ class Container:public Element_3D {
     class Free_Space:public External_Free_Space{
         std::list<std::shared_ptr<Free_Space>> related_free_spaces;
         Container* owner;
-    protected:
 
     public:
         Container* get_owner();
@@ -112,4 +111,5 @@ public:
 
 bool is_first_anchor_smaller_than_second(std::array<unsigned int,3> first, std::array<unsigned int,3> second);
 
+float calculate_container_usage(const Container &container,std::list<std::unique_ptr<A_Insertion_Coordinates>> &insertions);
 #endif //MASTERS_WORK_CONTAINER_H

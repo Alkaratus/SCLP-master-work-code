@@ -5,16 +5,16 @@
 #ifndef MASTERS_WORK_A_INSERTION_COORDINATES_H
 #define MASTERS_WORK_A_INSERTION_COORDINATES_H
 
-#include <memory>
 #include "Insertable_Element.h"
 #include "Point_3D.h"
 
 class A_Insertion_Coordinates {
     Point_3D start_point;
     Element_3D sizes;
-protected:
 
 public:
+    virtual ~A_Insertion_Coordinates() = default;
+
     A_Insertion_Coordinates(Point_3D start_point,Element_3D sizes);
 
     [[nodiscard]] Point_3D get_start_point() const;

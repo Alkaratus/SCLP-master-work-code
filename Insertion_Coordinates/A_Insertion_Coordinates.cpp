@@ -36,3 +36,4 @@ Point_3D A_Insertion_Coordinates::get_end_point() const {
 Element_3D A_Insertion_Coordinates::get_sizes() const{
     return sizes;
 }
+

@@ -62,12 +62,12 @@ void Container::add_relation_between_free_spaces(const shared_ptr<Free_Space>& f
     second->add_related_free_space(first);
 }
 
-bool Container::compare_free_spaces_anchors_lengths(shared_ptr<Container::Free_Space> &first,shared_ptr<Container::Free_Space> &second) {
+bool Container::compare_free_spaces_anchors_lengths(shared_ptr<Free_Space> &first,shared_ptr<Free_Space> &second) {
     return is_first_anchor_smaller_than_second(first->get_anchor_lengths(),second->get_anchor_lengths());
 }
 
-bool Container::compare_free_spaces_by_y_coordinate(shared_ptr<Container::Free_Space> &first,
-                                                    shared_ptr<Container::Free_Space> &last) {
+bool Container::compare_free_spaces_by_y_coordinate(shared_ptr<Free_Space> &first,
+                                                    shared_ptr<Free_Space> &last) {
     return first->get_anchor_corner().get_y() < last->get_anchor_corner().get_y();
 }
 
@@ -360,4 +360,12 @@ bool is_first_anchor_smaller_than_second(std::array<unsigned int,3> first, std::
         return first[1]<second[1];
     }
     return first[2]<second[2];
+}
+
+float calculate_container_usage(const Container &container,std::list<std::unique_ptr<A_Insertion_Coordinates>> &insertions) {
+    unsigned int volume=0;
+    for(const auto &insertion: insertions) {
+        volume+=insertion->get_sizes().get_volume();
+    }
+    return static_cast<float>(volume)/static_cast<float>(container.get_volume());
 }
