@@ -33,6 +33,10 @@ Block(
     }
 }
 
+Simple_Block::Simple_Block(const Simple_Block &block):Block(block) {
+    block_elements_pointers=block.block_elements_pointers;
+}
+
 Simple_Block::Simple_Block(const vector<vector<vector<Insertable_Element*>>>& block_elements_pointers):
         Block(
         calculate_block_size(block_elements_pointers).get_width(),
@@ -40,36 +44,43 @@ Simple_Block::Simple_Block(const vector<vector<vector<Insertable_Element*>>>& bl
         calculate_block_size(block_elements_pointers).get_height()
         ){
     vector<Insertable_Element*> row(block_elements_pointers[0][0].size(), nullptr);
-    vector<vector<Insertable_Element*>> layer(block_elements_pointers[0].size(),row);
-    this->block_elements_pointers=vector<vector<vector<Insertable_Element*>>>(block_elements_pointers.size(),layer);
+    vector layer(block_elements_pointers[0].size(),row);
+    this->block_elements_pointers=vector(block_elements_pointers.size(),layer);
+    for(unsigned int i=0;i<block_elements_pointers.size();i++){
+        for(unsigned int j=0;j<block_elements_pointers[0].size();j++){
+            for(unsigned int k=0;k<block_elements_pointers[0][0].size();k++){
+                this->block_elements_pointers[i][j][k]=block_elements_pointers[i][j][k];
+            }
+        }
+    }
 }
 
 void Simple_Block::rotate_in_x() {
     set_height(get_height()^get_depth());
     set_depth(get_height()^get_depth());
     set_height(get_height()^get_depth());
+    //TODO: trzeba przebudować wektor3D
 }
 
 void Simple_Block::rotate_in_y() {
     set_width(get_width()^get_depth());
     set_depth(get_width()^get_depth());
     set_width(get_width()^get_depth());
+    //TODO: trzeba przebudować wektor3D
 }
 
 void Simple_Block::rotate_in_z() {
     set_width(get_width()^get_height());
     set_height(get_width()^get_height());
     set_width(get_width()^get_height());
+    //TODO: trzeba przebudować wektor3D
 }
 
-bool Simple_Block::contains_element_with_id(unsigned int id) {
+bool Simple_Block::contains_element_with_id(const unsigned int id) {
     for (const auto& layer:block_elements_pointers){
         for(const auto& row:layer){
             for(const auto& element:row){
-                if(element->get_id()==id){
-                    return true;
-                }
-                if(element->contains_element_with_id(id)){
+                if(element->get_id()==id ||element->contains_element_with_id(id)){
                     return true;
                 }
             }
@@ -78,11 +89,18 @@ bool Simple_Block::contains_element_with_id(unsigned int id) {
     return false;
 }
 
-//TODO: trzeba zaimplementować wzorzec prototypu
 shared_ptr<Insertable_Element> Simple_Block::get_element_rotated_in_y() {
-
+    std::shared_ptr<Simple_Block>rotated(new Simple_Block(*this));
+    rotated->rotate_in_y();
     return nullptr;
 }
+
+std::shared_ptr<Insertable_Element> Simple_Block::get_element_rotated_in_x() {
+    std::shared_ptr<Simple_Block>rotated(new Simple_Block(*this));
+    rotated->rotate_in_x();
+    return nullptr;
+}
+
 
 void Simple_Block::accept(Visitor *visitor) {
     visitor->visit(this);

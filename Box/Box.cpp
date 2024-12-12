@@ -9,9 +9,15 @@ Box::Box(unsigned int width, unsigned int depth, unsigned int height) : Insertab
 
 }
 
+void Box::rotate_in_y() {
+    set_width(get_width()^get_depth());
+    set_depth(get_width()^get_depth());
+    set_width(get_width()^get_depth());
+}
+
 std::shared_ptr<Insertable_Element> Box::get_element_rotated_in_y() {
     std::shared_ptr<Box>rotated(new Box(*this));
-    rotated->rotate();
+    rotated->rotate_in_y();
     return rotated;
 }
 

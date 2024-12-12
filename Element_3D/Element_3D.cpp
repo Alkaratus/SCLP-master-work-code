@@ -1,11 +1,9 @@
 //
 // Created by kubam on 01.03.2024.
 //
-
-#include <iostream>
 #include "Element_3D.h"
 
-Element_3D::Element_3D(unsigned int width, unsigned int depth, unsigned int height):
+Element_3D::Element_3D(const unsigned int width, const unsigned int depth, const unsigned int height):
         width(width),depth(depth),height(height){
 }
 
@@ -58,4 +56,22 @@ bool compare_3D_elements_lexically(const Element_3D& first, const Element_3D& se
             :first.get_width()<second.get_width();
 }
 
+bool compare_3D_elements_by_width(const Element_3D& first, const Element_3D& second) {
+    return compare_3D_elements_lexically(first,second);
+}
 
+bool compare_3D_elements_by_depth(const Element_3D& first, const Element_3D& second) {
+    return first.get_depth()==second.get_depth()?
+            first.get_width()==second.get_width()?
+                first.get_height()<second.get_height()
+                :first.get_width()<second.get_width()
+            :first.get_depth()<second.get_depth();
+}
+
+bool compare_3D_elements_by_height(const Element_3D& first, const Element_3D& second) {
+    return first.get_height()==second.get_height()?
+            first.get_depth()==second.get_depth()?
+                first.get_width()<second.get_width()
+                :first.get_depth()<second.get_depth()
+            :first.get_height()<second.get_height();
+}

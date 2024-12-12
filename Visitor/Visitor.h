@@ -12,6 +12,8 @@ class Complex_Block;
 
 class Visitor {
 public:
+    virtual ~Visitor() = default;
+
     virtual void visit(Box *box){};
 
     virtual void visit(Simple_Block *block){};

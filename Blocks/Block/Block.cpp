@@ -7,3 +7,6 @@
 Block::Block(unsigned int width, unsigned int depth, unsigned int height) : Insertable_Element(width, depth, height) {
 
 }
+
+Block::Block(const Block &other):Insertable_Element(other) {
+}

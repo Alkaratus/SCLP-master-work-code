@@ -14,13 +14,6 @@ Element_3D(width,depth,height),id(++next_element_id) {
 Insertable_Element::Insertable_Element(const Insertable_Element &other):id(other.id),Element_3D(other) {
 }
 
-
-void Insertable_Element::rotate() {
-    set_width(get_width()^get_depth());
-    set_depth(get_width()^get_depth());
-    set_width(get_width()^get_depth());
-}
-
 unsigned int Insertable_Element::get_id() const{
     return id;
 }

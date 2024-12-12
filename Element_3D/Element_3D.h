@@ -27,5 +27,8 @@ public:
 };
 bool compare_3D_elements_by_volume(const Element_3D& first, const Element_3D& second);
 bool compare_3D_elements_lexically(const Element_3D& first, const Element_3D& second);
+bool compare_3D_elements_by_width(const Element_3D& first, const Element_3D& second);
+bool compare_3D_elements_by_depth(const Element_3D& first, const Element_3D& second);
+bool compare_3D_elements_by_height(const Element_3D& first, const Element_3D& second);
 
 #endif //MASTERS_WORK_ELEMENT_3D_H

@@ -3,17 +3,17 @@
 //
 #ifndef MASTERS_WORK_PACKER_H
 #define MASTERS_WORK_PACKER_H
+
 #include <list>
 #include <memory>
 #include <climits>
+#include "A_Packer.h"
 #include "Box.h"
 #include "Visitor.h"
 #include "Container.h"
 #include "Elements_Group.h"
 #include "Simple_Block.h"
 #include "Complex_Block.h"
-
-const unsigned int MIN_FILL_RATIO=100;
 
 class Packer: public Visitor {
     std::list<std::shared_ptr<Insertable_Element>> elements;
@@ -35,12 +35,17 @@ public:
 
     void visit(Box *box) override;
     void visit(Simple_Block *block) override;
+    void visit(Complex_Block *block) override;
 };
 
 bool compare_elements_ptr_by_lengths(const std::shared_ptr<Insertable_Element>& first,const std::shared_ptr<Insertable_Element>& second);
 
+/// Group elements in list by sizes
 std::list<Elements_Group>group_elements_in_list(const std::list<std::shared_ptr<Insertable_Element>> &elements);
 std::list<std::shared_ptr<Simple_Block>>create_simple_blocks(const std::list<Elements_Group> &groups);
-std::list<Complex_Block>create_complex_block(const std::list<Elements_Group> &groups);
+std::list<std::shared_ptr<Complex_Block>> create_complex_block(std::list<Elements_Group> groups, Container &container);
+
+std::vector<std::list<Elements_Group>::iterator>create_chain_of_iterators(std::list<Elements_Group> &groups, int elements_in_chain);
+bool increment_chain_of_iterators(std::vector<std::list<Elements_Group>::iterator>&iterators,std::list<Elements_Group>::iterator end);
 
 #endif //MASTERS_WORK_PACKER_H

@@ -10,6 +10,7 @@
 class Block: public Insertable_Element {
 public:
     Block(unsigned int width, unsigned int depth, unsigned int height);
+    Block(const Block& other);
 };
 
 

@@ -16,15 +16,14 @@ class Insertable_Element: public Element_3D {
 protected:
     ///Creates copy instance of element for element rotation creation
     Insertable_Element(const Insertable_Element &other);
-    void rotate();
 public:
     Insertable_Element(unsigned int width, unsigned int depth, unsigned int height);
     virtual ~Insertable_Element()=default;
-    
+    virtual void rotate_in_y()=0;
     virtual std::shared_ptr<Insertable_Element> get_element_rotated_in_y()=0;
+    virtual bool contains_element_with_id(unsigned int id)=0;
     [[nodiscard]] unsigned int get_id() const;
     [[nodiscard]] std::string get_properties() const override;
-    virtual bool contains_element_with_id(unsigned int id)=0;
 
     virtual void accept(Visitor *packer);
     friend class Test;

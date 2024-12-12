@@ -15,13 +15,17 @@ enum axis{
 };
 
 class Complex_Block: public Block {
-    std::vector<Insertable_Element*>block_elements_IDs;
+    std::vector<Insertable_Element*>block_elements_pointers;
     axis merge_axis;
 public:
     Complex_Block(const std::vector<Insertable_Element*>&block_elements,axis merge_axis);
     std::shared_ptr<Insertable_Element> get_element_rotated_in_y() override;
+    void rotate_in_y() override;
     bool contains_element_with_id(unsigned int id) override;
+    std::vector<Insertable_Element*> get_block_elements_pointers();
+    axis get_merge_axis() const;
 
+    void accept(Visitor *packer) override;
 };
 
 Element_3D calculate_block_size(std::vector<Insertable_Element*>block_elements_IDs,axis merge_axis);
