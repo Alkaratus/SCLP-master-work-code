@@ -12,12 +12,14 @@ using std::list, std::shared_ptr, std::make_shared;
 
 Container::Container(unsigned int width, unsigned int depth, unsigned int height):
         Element_3D(width,depth,height), element_max_sizes(width,depth,height){
-    free_spaces.emplace_back(make_shared<Container::Free_Space>(Point_3D(0,0,0),width,depth,height,this));
+    free_spaces.emplace_back(make_shared<Free_Space>(Point_3D(0,0,0),width,depth,height,this));
 }
 
 Container::Container(const Container &other): Element_3D(other), element_max_sizes(other.element_max_sizes) {
-    free_spaces.emplace_back(make_shared<Container::Free_Space>(Point_3D(0,0,0),get_width(),
-                                                                get_depth(),get_height(),this));
+    for(auto &free_space : other.free_spaces) {
+        free_spaces.emplace_back(make_shared<Free_Space>(free_space->get_start_corner(),free_space->get_width(),
+            free_space->get_depth(),free_space->get_height(),this));
+    }
 }
 
 void Container::remove_inserted_spaces() {
@@ -141,7 +143,7 @@ Container::get_last_element_with_same_y_after(list<shared_ptr<Free_Space>>::iter
     return last_free_space;
 }
 
-std::unique_ptr<A_Insertion_Coordinates> Container::insert_element_into_free_space(list<shared_ptr<Container::Free_Space>>::iterator free_space,
+std::unique_ptr<A_Insertion_Coordinates> Container::insert_element_into_free_space(list<shared_ptr<Free_Space>>::iterator free_space,
                                                Insertable_Element *element) {
     auto insertion_coordinates=free_space->get()->get_insertion_coordinates_for_element(element);
     auto free_space_above=free_space->get()->create_free_space_above_inserted_element(insertion_coordinates.get());
@@ -167,7 +169,7 @@ std::unique_ptr<A_Insertion_Coordinates> Container::insert_element_into_free_spa
     return insertion_coordinates;
 }
 
-bool Container::cant_element_be_inserted(Insertable_Element* element) {
+bool Container::cant_element_be_inserted(Insertable_Element* element) const {
     return element_max_sizes.get_width()<element->get_width()||
            element_max_sizes.get_depth()<element->get_depth()||
            element_max_sizes.get_height()<element->get_height();
@@ -186,7 +188,7 @@ void Container::remove_free_space(shared_ptr<Free_Space> &space) {
     }
 }
 
-std::string Container::get_text_list_of_free_spaces() {
+std::string Container::get_text_list_of_free_spaces() const {
     std::string list;
     for (const auto& free_space:free_spaces){
         list+=free_space->get_properties()+'\n';

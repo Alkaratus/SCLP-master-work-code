@@ -15,20 +15,16 @@
 #include "Simple_Block.h"
 #include "Complex_Block.h"
 
-class Packer: public Visitor {
-    std::list<std::shared_ptr<Insertable_Element>> elements;
-    Container container;
+class Packer: public A_Packer {
     unsigned int max_number_of_simple_blocks=UINT_MAX;
     unsigned int max_number_of_complex_block_merges=UINT_MAX;
     unsigned int min_fill_ratio=MIN_FILL_RATIO;
 
-    Insertable_Element *select_element(Free_Space &selected_free_space) const;
-
+    Insertable_Element *select_element(Free_Space &selected_free_space);
     void create_blocks();
     void delete_element(Insertable_Element *element);
 
-    ///Creates rotations of elements in Y axis
-    void create_elements_rotations();
+
 public:
     Packer(const std::list<Box>& boxes, const Container& container);
     std::list<std::unique_ptr<A_Insertion_Coordinates>> pack();

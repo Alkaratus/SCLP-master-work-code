@@ -41,6 +41,7 @@ class Container:public Element_3D {
         virtual std::shared_ptr<Free_Space> get_slice_on_back_from(unsigned int point_z_value);
 
         bool do_point_affects(const Point_2D &point);
+        bool have_start_point_equal(const Point_2D &point) const;
 
         virtual std::shared_ptr<Free_Space> create_free_space_above_inserted_element(const A_Insertion_Coordinates *inserted_element_coordinates);
         virtual std::list<std::shared_ptr<Free_Space>> add_free_spaces_on_sides_of_inserted_element(A_Insertion_Coordinates *inserted_element_coordinates);
@@ -84,8 +85,8 @@ class Container:public Element_3D {
 
     static void add_relation_between_free_spaces(const std::shared_ptr<Free_Space>& first, const std::shared_ptr<Free_Space>& second);
 
-    static bool compare_free_spaces_anchors_lengths(std::shared_ptr<Container::Free_Space>& first,std::shared_ptr<Container::Free_Space> &last);
-    static bool compare_free_spaces_by_y_coordinate(std::shared_ptr<Container::Free_Space>& first, std::shared_ptr<Container::Free_Space> &last);
+    static bool compare_free_spaces_anchors_lengths(std::shared_ptr<Free_Space>& first,std::shared_ptr<Free_Space> &last);
+    static bool compare_free_spaces_by_y_coordinate(std::shared_ptr<Free_Space>& first, std::shared_ptr<Free_Space> &last);
     static void mark_relations_between_free_spaces_in_lists(std::list<std::shared_ptr<Free_Space>> &first, std::list<std::shared_ptr<Free_Space>>& second);
 
     void remove_inserted_spaces_from_list(std::list<std::shared_ptr<Free_Space>> &free_spaces);
@@ -101,9 +102,9 @@ public:
     std::list<std::shared_ptr<Free_Space>>::iterator select_free_space();
     std::unique_ptr<A_Insertion_Coordinates> insert_element_into_free_space(std::list<std::shared_ptr<Free_Space>>::iterator free_space,Insertable_Element* element);
     ///Checks if element can't be definitely inserted into container BUT it doesn't check can element be inserted
-    bool cant_element_be_inserted(Insertable_Element* element);
+    bool cant_element_be_inserted(Insertable_Element* element) const;
     void remove_free_space(std::shared_ptr<Free_Space> &space);
-    std::string get_text_list_of_free_spaces();
+    std::string get_text_list_of_free_spaces() const;
     void make_merges_for_new(std::shared_ptr<Free_Space> &space);
     std::shared_ptr<Free_Space> create_merge_in_x(const std::shared_ptr<Free_Space>& first,const std::shared_ptr<Free_Space>& second);
     std::shared_ptr<Free_Space> create_merge_in_z(const std::shared_ptr<Free_Space>& first,const std::shared_ptr<Free_Space>& second);

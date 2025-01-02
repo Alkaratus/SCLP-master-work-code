@@ -59,21 +59,30 @@ void Simple_Block::rotate_in_x() {
     set_height(get_height()^get_depth());
     set_depth(get_height()^get_depth());
     set_height(get_height()^get_depth());
-    //TODO: trzeba przebudować wektor3D
+    vector<Insertable_Element*> row(block_elements_pointers[0][0].size(), nullptr);
+    vector layer(block_elements_pointers.size(),row);
+    vector new_cube(block_elements_pointers[0].size(),layer);
+    //TODO: trzeba wypełnić wektor3D
 }
 
 void Simple_Block::rotate_in_y() {
     set_width(get_width()^get_depth());
     set_depth(get_width()^get_depth());
     set_width(get_width()^get_depth());
-    //TODO: trzeba przebudować wektor3D
+    vector<Insertable_Element*> row(block_elements_pointers[0].size(), nullptr);
+    vector layer(block_elements_pointers[0][0].size(),row);
+    vector new_cube(block_elements_pointers.size(),layer);
+    //TODO: trzeba wypełnić wektor3D
 }
 
 void Simple_Block::rotate_in_z() {
     set_width(get_width()^get_height());
     set_height(get_width()^get_height());
     set_width(get_width()^get_height());
-    //TODO: trzeba przebudować wektor3D
+    vector<Insertable_Element*> row(block_elements_pointers.size(), nullptr);
+    vector layer(block_elements_pointers[0].size(),row);
+    vector new_cube(block_elements_pointers[0][0].size(),layer);
+    //TODO: trzeba wypełnić wektor3D
 }
 
 bool Simple_Block::contains_element_with_id(const unsigned int id) {
@@ -92,13 +101,13 @@ bool Simple_Block::contains_element_with_id(const unsigned int id) {
 shared_ptr<Insertable_Element> Simple_Block::get_element_rotated_in_y() {
     std::shared_ptr<Simple_Block>rotated(new Simple_Block(*this));
     rotated->rotate_in_y();
-    return nullptr;
+    return rotated;
 }
 
 std::shared_ptr<Insertable_Element> Simple_Block::get_element_rotated_in_x() {
     std::shared_ptr<Simple_Block>rotated(new Simple_Block(*this));
     rotated->rotate_in_x();
-    return nullptr;
+    return rotated;
 }
 
 

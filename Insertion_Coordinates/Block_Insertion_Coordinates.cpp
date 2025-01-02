@@ -9,11 +9,15 @@ Block_Insertion_Coordinates::Block_Insertion_Coordinates(Point_3D startPoint, Bl
     element_id(block->get_id()),sub_elements(std::move(sub_elements)) {
 }
 
-std::string Block_Insertion_Coordinates::create_json() {
-    std::string json="Block:{\n";
-    json+="id:"+std::to_string(element_id)+",\n";
-    for(auto &sub_element : sub_elements) {
-        json+=sub_element->create_json()+'\n';
-    }
-    return json+"}";
+std::string Block_Insertion_Coordinates::accept(Insertion_Coordinates_Displayer* displayer) {
+    return displayer->display_block_coordinates(this);
 }
+
+unsigned int Block_Insertion_Coordinates::get_element_id() const {
+    return element_id;
+}
+
+std::vector<std::unique_ptr<A_Insertion_Coordinates>>& Block_Insertion_Coordinates::get_sub_elements() {
+    return sub_elements;
+}
+
