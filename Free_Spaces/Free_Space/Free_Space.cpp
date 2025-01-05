@@ -52,8 +52,20 @@ unsigned int Free_Space::get_id() {
 }
 
 bool Free_Space::is_related_with_another(const Free_Space &other) const {
-    return get_start_corner()==other.get_start_corner() || get_wider_corner()==other.get_wider_corner() || get_deeper_corner()==other.get_deeper_corner() ||
-    get_end_corner()==other.get_end_corner();
+    if(get_start_corner()==other.get_start_corner() || get_wider_corner()==other.get_wider_corner() || get_deeper_corner()==other.get_deeper_corner() ||
+    get_end_corner()==other.get_end_corner()) {
+        return true;
+    }
+    if(
+    get_start_corner().get_z()<=other.get_start_corner().get_z()&& get_deeper_corner().get_z()>other.get_start_corner().get_z() &&
+    other.get_start_corner().get_x()<=get_start_corner().get_x()&& other.get_wider_corner().get_x()>get_start_corner().get_x() ||
+    get_start_corner().get_x()<=other.get_start_corner().get_x()&& get_wider_corner().get_x()>other.get_start_corner().get_x() &&
+    other.get_start_corner().get_z()<=get_start_corner().get_z()&& other.get_deeper_corner().get_z()>get_start_corner().get_z()
+
+    ) {
+        return true;
+    }
+    return false;
 }
 
 bool Free_Space::is_inside_another(const Free_Space &other) const {

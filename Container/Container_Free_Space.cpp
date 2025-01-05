@@ -127,47 +127,50 @@ list<shared_ptr<Container::Free_Space>>Container::Free_Space::create_free_space_
     auto it=related_free_spaces.begin();
     while(it!=related_free_spaces.end()){
         bool related_free_space_affected=false;
-        shared_ptr<Free_Space> first, second, third;
-        if((*it)->have_start_point_equal(inserted_element_coordinates->get_start_point())) {
-            first=(*it)->get_slice_on_right_from(insertion_end_point.get_x());
-            second=(*it)->get_slice_on_back_from(insertion_end_point.get_z());
+        std::array<shared_ptr<Free_Space>,4>recreated_free_spaces;
+        for(auto &free_space:recreated_free_spaces) {
+            free_space=nullptr;
+        }
+        if(insertion_deeper_point.get_x()>(*it)->get_start_corner().get_x()&&insertion_deeper_point.get_z()>(*it)->get_start_corner().get_z()&&insertion_wider_point.get_z()<get_end_corner().get_z()) {
+            recreated_free_spaces[0]=(*it)->get_slice_on_left_from(insertion_deeper_point.get_x());
             related_free_space_affected=true;
         }
-        if((*it)->do_point_affects(insertion_end_point)){
-            first=(*it)->get_slice_on_right_from(insertion_end_point.get_x());
-            second=(*it)->get_slice_on_back_from(insertion_end_point.get_z());
+        if(insertion_wider_point.get_z()>(*it)->get_start_corner().get_z()&&insertion_wider_point.get_x()>(*it)->get_start_corner().get_x()&&insertion_deeper_point.get_x()<(*it)->get_end_corner().get_x()) {
+            recreated_free_spaces[1]=(*it)->get_slice_on_front_from(insertion_wider_point.get_z());
             related_free_space_affected=true;
         }
-        if((*it)->do_point_affects(insertion_wider_point)){
-            third=(*it)->get_slice_on_front_from(insertion_wider_point.get_z());
+        if(insertion_wider_point.get_x()<(*it)->get_end_corner().get_x()&&insertion_deeper_point.get_z()>(*it)->get_start_corner().get_z()&&insertion_wider_point.get_z()<get_end_corner().get_z()) {
+            recreated_free_spaces[2]=(*it)->get_slice_on_right_from(insertion_end_point.get_x());
+            related_free_space_affected=true;
         }
-        if((*it)->do_point_affects(insertion_deeper_point)){
-            third=(*it)->get_slice_on_left_from(insertion_deeper_point.get_x());
+        if(insertion_end_point.get_z()<(*it)->get_end_corner().get_z()&&insertion_wider_point.get_x()>(*it)->get_start_corner().get_x()&&insertion_deeper_point.get_x()<(*it)->get_end_corner().get_x()) {
+            recreated_free_spaces[3]=(*it)->get_slice_on_back_from(insertion_end_point.get_z());
+            related_free_space_affected=true;
         }
 
         if(related_free_space_affected){
-            add_relation_between_free_spaces(first,second);
-            add_relation_between_free_spaces(first,third);
-            add_relation_between_free_spaces(second,third);
-            if(first!= nullptr){
-                new_free_spaces.emplace_back(first);
-            }
-            if(second!= nullptr){
-                new_free_spaces.emplace_back(second);
-            }
-            if (third!=nullptr){
-                new_free_spaces.emplace_back(third);
-            }
-
+            add_relation_between_free_spaces(recreated_free_spaces[3],recreated_free_spaces[0]);
+            add_relation_between_free_spaces(recreated_free_spaces[0],recreated_free_spaces[1]);
+            add_relation_between_free_spaces(recreated_free_spaces[1],recreated_free_spaces[2]);
+            add_relation_between_free_spaces(recreated_free_spaces[2],recreated_free_spaces[3]);
             auto next=it;
             next++;
             owner->remove_free_space((*it));
             it=next;
+            std::list<shared_ptr<Free_Space>> conversion;
+            for(const auto& free_space:recreated_free_spaces) {
+                if(free_space!=nullptr) {
+                    conversion.emplace_back(free_space);
+                }
+            }
+            mark_relations_between_free_spaces_in_lists(conversion,new_free_spaces);
+            new_free_spaces.insert(new_free_spaces.end(),conversion.begin(),conversion.end());
         }
         else{
             it++;
         }
     }
+
     return new_free_spaces;
 }
 
