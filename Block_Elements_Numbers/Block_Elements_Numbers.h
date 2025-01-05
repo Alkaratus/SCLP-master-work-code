@@ -13,10 +13,10 @@ class Block_Elements_Numbers {
 public:
     Block_Elements_Numbers(unsigned int elements_in_width, unsigned int elements_in_depth,
                            unsigned int elements_in_height);
-    unsigned int get_elements_number_in_block() const;
-    unsigned int get_elements_number_in_width() const;
-    unsigned int get_elements_number_in_depth() const;
-    unsigned int get_elements_number_in_height() const;
+    [[nodiscard]] unsigned int get_elements_number_in_block() const;
+    [[nodiscard]] unsigned int get_elements_number_in_width() const;
+    [[nodiscard]] unsigned int get_elements_number_in_depth() const;
+    [[nodiscard]] unsigned int get_elements_number_in_height() const;
 
     void set_elements_number_in_width(unsigned int number);
     void set_elements_number_in_depth(unsigned int number);
