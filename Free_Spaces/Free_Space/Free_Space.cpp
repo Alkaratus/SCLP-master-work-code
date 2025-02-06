@@ -6,7 +6,7 @@
 
 unsigned int Free_Space::next_id=0;
 
-Free_Space::Free_Space(Point_3D start, unsigned int width, unsigned int depth, unsigned int height):
+Free_Space::Free_Space(const Point_3D &start, const unsigned int width, const unsigned int depth, const unsigned int height):
         Element_3D(width,depth,height), id(++next_id), start_point(start){
 
 }
@@ -27,7 +27,7 @@ Point_3D Free_Space::get_end_corner() const {
     return Point_3D(start_point.get_x() + get_width(), start_point.get_y(), start_point.get_z() + get_depth());
 }
 
-bool Free_Space::can_element_be_inserted(const Insertable_Element *element) {
+bool Free_Space::can_element_be_inserted(const Insertable_Element *element) const {
     return get_width()>=element->get_width()&& get_depth()>=element->get_depth() && get_height()>=element->get_height();
 }
 
@@ -47,7 +47,7 @@ std::string Free_Space::get_properties() const{
     return properties;
 }
 
-unsigned int Free_Space::get_id() {
+unsigned int Free_Space::get_id() const {
     return id;
 }
 
@@ -74,12 +74,12 @@ bool Free_Space::is_inside_another(const Free_Space &other) const {
     return start_inside && end_inside;
 }
 
-bool Free_Space::is_adjacent_to_another_in_x(const Free_Space &other) {
+bool Free_Space::is_adjacent_to_another_in_x(const Free_Space &other) const {
     return get_end_corner().get_x()==other.get_start_corner().get_x() && ((get_start_corner().get_z()<=other.get_start_corner().get_z() && get_end_corner().get_z()>other.get_start_corner().get_z()) ||
     (other.get_start_corner().get_z()<=get_start_corner().get_z() && other.get_end_corner().get_z()>get_start_corner().get_z()));
 }
 
-bool Free_Space::is_adjacent_to_another_in_z(const Free_Space &other) {
+bool Free_Space::is_adjacent_to_another_in_z(const Free_Space &other) const {
     return get_end_corner().get_z()==other.get_start_corner().get_z() && ((get_start_corner().get_x()<=other.get_start_corner().get_x() && get_end_corner().get_x()>other.get_start_corner().get_x()) ||
     (other.get_start_corner().get_x()<=get_start_corner().get_x() && other.get_end_corner().get_x()>get_start_corner().get_x()));
 }

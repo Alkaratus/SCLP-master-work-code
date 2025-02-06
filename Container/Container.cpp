@@ -11,11 +11,11 @@ using std::list, std::shared_ptr, std::make_shared;
 ///Container
 
 Container::Container(unsigned int width, unsigned int depth, unsigned int height):
-        Element_3D(width,depth,height), element_max_sizes(width,depth,height){
+        Element_3D(width,depth,height), sizes(width,depth,height){
     free_spaces.emplace_back(make_shared<Free_Space>(Point_3D(0,0,0),width,depth,height,this));
 }
 
-Container::Container(const Container &other): Element_3D(other), element_max_sizes(other.element_max_sizes) {
+Container::Container(const Container &other): Element_3D(other), sizes(other.sizes) {
     for(auto &free_space : other.free_spaces) {
         free_spaces.emplace_back(make_shared<Free_Space>(free_space->get_start_corner(),free_space->get_width(),
             free_space->get_depth(),free_space->get_height(),this));
@@ -149,6 +149,7 @@ std::unique_ptr<A_Insertion_Coordinates> Container::insert_element_into_free_spa
     auto free_space_above=free_space->get()->create_free_space_above_inserted_element(insertion_coordinates.get());
 
     auto free_spaces_on_sides=free_space->get()->add_free_spaces_on_sides_of_inserted_element(insertion_coordinates.get());
+
     auto related_free_spaces=free_space->get()->create_free_space_from_related_free_spaces(insertion_coordinates.get());
 
     remove_free_space(*free_space);
@@ -170,9 +171,9 @@ std::unique_ptr<A_Insertion_Coordinates> Container::insert_element_into_free_spa
 }
 
 bool Container::cant_element_be_inserted(Insertable_Element* element) const {
-    return element_max_sizes.get_width()<element->get_width()||
-           element_max_sizes.get_depth()<element->get_depth()||
-           element_max_sizes.get_height()<element->get_height();
+    return sizes.get_width()<element->get_width()||
+           sizes.get_depth()<element->get_depth()||
+           sizes.get_height()<element->get_height();
 }
 
 void Container::remove_free_space(shared_ptr<Free_Space> &space) {

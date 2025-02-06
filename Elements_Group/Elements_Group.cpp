@@ -8,9 +8,8 @@
 
 
 
-Elements_Group::Elements_Group(const std::list<Insertable_Element*>& elements_pointers):
-elements_pointers(elements_pointers.begin(),elements_pointers.end()){
-
+Elements_Group::Elements_Group(const std::list<Insertable_Element*>& elements_pointers): group_element_properties(*(this->elements_pointers[0])),
+    elements_pointers(elements_pointers.begin(), elements_pointers.end()) {
 }
 
 const std::vector<Insertable_Element*> &Elements_Group::get_elements_pointers() const {
@@ -18,7 +17,7 @@ const std::vector<Insertable_Element*> &Elements_Group::get_elements_pointers() 
 }
 
 Element_3D Elements_Group::get_group_element_properties() const{
-    return *elements_pointers[0];
+    return group_element_properties;
 }
 
 

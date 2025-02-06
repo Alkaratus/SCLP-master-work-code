@@ -57,6 +57,7 @@ void Packer::create_blocks() {
     auto complex_blocks= create_complex_block(groups,get_container());
     get_elements().insert(get_elements().end(),simple_blocks.begin(),simple_blocks.end());
     get_elements().insert(get_elements().end(),complex_blocks.begin(),complex_blocks.end());
+    set_elements_groups(groups);
 }
 
 void Packer::delete_element(Insertable_Element *element) {
@@ -146,6 +147,7 @@ list<Elements_Group>group_elements_in_list(const list<std::shared_ptr<Insertable
         }
         elements_IDs.emplace_back(iter->get());
     }
+    groups.emplace_back(elements_IDs);
     return groups;
 }
 

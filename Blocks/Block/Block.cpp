@@ -4,7 +4,7 @@
 
 #include "Block.h"
 
-Block::Block(unsigned int width, unsigned int depth, unsigned int height) : Insertable_Element(width, depth, height) {
+Block::Block(const unsigned int width, const unsigned int depth, const unsigned int height) : Insertable_Element(width, depth, height) {
 
 }
 

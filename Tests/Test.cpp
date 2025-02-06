@@ -10,7 +10,7 @@ bool Test::test_insertable_element_rotation() {
     auto width_before_rotation=element.get_width();
     auto depth_before_rotation= element.get_depth();
     auto height_before_rotation=element.get_height();
-    element.rotate();
+    element.rotate_in_y();
     return width_before_rotation==element.get_depth() && depth_before_rotation==element.get_width() &&
     height_before_rotation==element.get_height();
 }

@@ -5,10 +5,10 @@
 #ifndef MASTERS_WORK_A_INSERTION_COORDINATES_H
 #define MASTERS_WORK_A_INSERTION_COORDINATES_H
 
-#include <list>
+
 #include "Insertable_Element.h"
 #include "Point_3D.h"
-#include "Insertion_Coordinates_Displayer.h"
+#include "I_Coordinates_Displayer.h"
 
 class A_Insertion_Coordinates {
     Point_3D start_point;
@@ -25,7 +25,7 @@ public:
     [[nodiscard]] Point_3D get_end_point() const;
 
     [[nodiscard]] Element_3D get_sizes() const;
-    virtual std::string accept(Insertion_Coordinates_Displayer* displayer)=0;
+    virtual std::string accept(I_Coordinates_Displayer* displayer)=0;
 
 };
 

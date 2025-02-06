@@ -12,8 +12,8 @@ class Point_2D {
 public:
     explicit Point_2D(unsigned int x=0,unsigned int z=0);
 
-    unsigned int get_x() const;
-    unsigned int get_z() const;
+    [[nodiscard]] unsigned int get_x() const;
+    [[nodiscard]] unsigned int get_z() const;
 
     void set_x(unsigned int x);
     void set_z(unsigned int z);

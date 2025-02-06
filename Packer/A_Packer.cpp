@@ -33,6 +33,18 @@ Container& A_Packer::get_container() {
     return container;
 }
 
+void A_Packer::set_elements_groups(const std::list<Elements_Group> &_elements_groups) {
+    elements_groups = _elements_groups;
+}
+
+const Container & A_Packer::get_container_data() const {
+    return container;
+}
+
+const std::list<Elements_Group> & A_Packer::get_elements_groups_data() const {
+    return elements_groups;
+}
+
 list<shared_ptr<Insertable_Element>> convert_boxes_to_elements(const list<Box>& boxes) {
     list<shared_ptr<Insertable_Element>> elements;
     for(auto &box:boxes){

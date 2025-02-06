@@ -13,7 +13,7 @@ Container::Free_Space::Free_Space(Point_3D start, unsigned int width, unsigned i
                                   Container *owner): External_Free_Space(start,width,depth,height),owner(owner) {
 }
 
-Container *Container::Free_Space::get_owner() {
+Container *Container::Free_Space::get_owner() const {
     return owner;
 }
 
@@ -131,19 +131,19 @@ list<shared_ptr<Container::Free_Space>>Container::Free_Space::create_free_space_
         for(auto &free_space:recreated_free_spaces) {
             free_space=nullptr;
         }
-        if(insertion_deeper_point.get_x()>(*it)->get_start_corner().get_x()&&insertion_deeper_point.get_z()>(*it)->get_start_corner().get_z()&&insertion_wider_point.get_z()<get_end_corner().get_z()) {
+        if(insertion_deeper_point.get_x()>(*it)->get_start_corner().get_x()&&insertion_deeper_point.get_x()<(*it)->get_end_corner().get_x()&&insertion_deeper_point.get_z()>(*it)->get_start_corner().get_z()&&insertion_wider_point.get_z()<get_end_corner().get_z()) {
             recreated_free_spaces[0]=(*it)->get_slice_on_left_from(insertion_deeper_point.get_x());
             related_free_space_affected=true;
         }
-        if(insertion_wider_point.get_z()>(*it)->get_start_corner().get_z()&&insertion_wider_point.get_x()>(*it)->get_start_corner().get_x()&&insertion_deeper_point.get_x()<(*it)->get_end_corner().get_x()) {
+        if(insertion_wider_point.get_z()>(*it)->get_start_corner().get_z()&&insertion_wider_point.get_z()<(*it)->get_end_corner().get_z()&&insertion_wider_point.get_x()>(*it)->get_start_corner().get_x()&&insertion_deeper_point.get_x()<(*it)->get_end_corner().get_x()) {
             recreated_free_spaces[1]=(*it)->get_slice_on_front_from(insertion_wider_point.get_z());
             related_free_space_affected=true;
         }
-        if(insertion_wider_point.get_x()<(*it)->get_end_corner().get_x()&&insertion_deeper_point.get_z()>(*it)->get_start_corner().get_z()&&insertion_wider_point.get_z()<get_end_corner().get_z()) {
+        if(insertion_wider_point.get_x()>(*it)->get_start_corner().get_x()&&insertion_wider_point.get_x()<(*it)->get_end_corner().get_x()&&insertion_deeper_point.get_z()>(*it)->get_start_corner().get_z()&&insertion_wider_point.get_z()<get_end_corner().get_z()) {
             recreated_free_spaces[2]=(*it)->get_slice_on_right_from(insertion_end_point.get_x());
             related_free_space_affected=true;
         }
-        if(insertion_end_point.get_z()<(*it)->get_end_corner().get_z()&&insertion_wider_point.get_x()>(*it)->get_start_corner().get_x()&&insertion_deeper_point.get_x()<(*it)->get_end_corner().get_x()) {
+        if(insertion_end_point.get_z()>(*it)->get_start_corner().get_z()&&insertion_end_point.get_z()<(*it)->get_end_corner().get_z()&&insertion_wider_point.get_x()>(*it)->get_start_corner().get_x()&&insertion_deeper_point.get_x()<(*it)->get_end_corner().get_x()) {
             recreated_free_spaces[3]=(*it)->get_slice_on_back_from(insertion_end_point.get_z());
             related_free_space_affected=true;
         }

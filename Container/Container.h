@@ -24,7 +24,7 @@ class Container:public Element_3D {
         Container* owner;
 
     public:
-        Container* get_owner();
+        Container* get_owner() const;
 
         Free_Space(Point_3D start, unsigned int width, unsigned int depth, unsigned int height, Container* owner);
         virtual Point_3D get_anchor_corner();
@@ -81,7 +81,7 @@ class Container:public Element_3D {
     };
 
     std::list<std::shared_ptr<Free_Space>>free_spaces; ///< Collection of free spaces
-    Element_3D element_max_sizes; ///
+    Element_3D sizes; ///
 
     static void add_relation_between_free_spaces(const std::shared_ptr<Free_Space>& first, const std::shared_ptr<Free_Space>& second);
 
@@ -104,7 +104,7 @@ public:
     ///Checks if element can't be definitely inserted into container BUT it doesn't check can element be inserted
     bool cant_element_be_inserted(Insertable_Element* element) const;
     void remove_free_space(std::shared_ptr<Free_Space> &space);
-    std::string get_text_list_of_free_spaces() const;
+    [[nodiscard]] std::string get_text_list_of_free_spaces() const;
     void make_merges_for_new(std::shared_ptr<Free_Space> &space);
     std::shared_ptr<Free_Space> create_merge_in_x(const std::shared_ptr<Free_Space>& first,const std::shared_ptr<Free_Space>& second);
     std::shared_ptr<Free_Space> create_merge_in_z(const std::shared_ptr<Free_Space>& first,const std::shared_ptr<Free_Space>& second);

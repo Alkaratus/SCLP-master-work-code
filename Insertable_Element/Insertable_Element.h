@@ -18,7 +18,7 @@ protected:
     Insertable_Element(const Insertable_Element &other);
 public:
     Insertable_Element(unsigned int width, unsigned int depth, unsigned int height);
-    virtual ~Insertable_Element()=default;
+    ~Insertable_Element() override =default;
     virtual void rotate_in_y()=0;
     virtual std::shared_ptr<Insertable_Element> get_element_rotated_in_y()=0;
     virtual bool contains_element_with_id(unsigned int id)=0;

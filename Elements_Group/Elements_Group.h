@@ -11,6 +11,7 @@
 
 class Elements_Group {
     std::vector<Insertable_Element*>elements_pointers;
+    Element_3D group_element_properties;
 public:
     explicit Elements_Group(const std::list<Insertable_Element *>& elements_pointers);
     const std::vector<Insertable_Element*>& get_elements_pointers() const;

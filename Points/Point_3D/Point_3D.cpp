@@ -18,7 +18,7 @@ void Point_3D::set_y(unsigned int _y) {
     y=_y;
 }
 
-bool Point_3D::operator==(const Point_3D &other) {
+bool Point_3D::operator==(const Point_3D &other) const {
     return Point_2D::operator==(other) && y==other.y;
 }
 

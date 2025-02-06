@@ -9,7 +9,7 @@ Block_Insertion_Coordinates::Block_Insertion_Coordinates(Point_3D startPoint, Bl
     element_id(block->get_id()),sub_elements(std::move(sub_elements)) {
 }
 
-std::string Block_Insertion_Coordinates::accept(Insertion_Coordinates_Displayer* displayer) {
+std::string Block_Insertion_Coordinates::accept(I_Coordinates_Displayer* displayer) {
     return displayer->display_block_coordinates(this);
 }
 
