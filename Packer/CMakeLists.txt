@@ -1,6 +1,8 @@
 set (lib_name Packer)
 
-add_library(${lib_name} ${lib_name}.h ${lib_name}.cpp
+add_library(${lib_name}
+        ${lib_name}.h
+        ${lib_name}.cpp
         A_Packer.cpp
         A_Packer.h
         Scenerio_Tree_Packer.h

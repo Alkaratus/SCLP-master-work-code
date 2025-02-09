@@ -11,8 +11,12 @@
 #include <fstream>
 
 #include "Visualisation_Coordinates_Displayer.h"
+#include "Packer_Parser.h"
 
 int main(int argc, char*argv[]){
+
+    auto generated_packer=generate_packer("input.json");
+
     Container container(10,10,10);
     auto boxes= generate_boxes(container.get_volume(),geometrical_distribution,5);
     Packer packer(boxes,container);
