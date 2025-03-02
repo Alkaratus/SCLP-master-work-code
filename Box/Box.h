@@ -14,7 +14,8 @@ public:
     Box(const Box& other);
 
     void rotate_in_y() override;
-    std::shared_ptr<Insertable_Element> get_element_rotated_in_y() override;
+    std::unique_ptr<Insertable_Element> get_element_copy() override;
+    std::unique_ptr<Insertable_Element> get_element_rotated_in_y() override;
     bool contains_element_with_id(unsigned int id) override;
     void accept(Visitor *visitor) override;
 };

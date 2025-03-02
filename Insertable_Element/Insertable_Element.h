@@ -20,7 +20,10 @@ public:
     Insertable_Element(unsigned int width, unsigned int depth, unsigned int height);
     ~Insertable_Element() override =default;
     virtual void rotate_in_y()=0;
-    virtual std::shared_ptr<Insertable_Element> get_element_rotated_in_y()=0;
+    /// Creates copy of element
+    /// \return copied element
+    virtual std::unique_ptr<Insertable_Element> get_element_copy()=0;
+    virtual std::unique_ptr<Insertable_Element> get_element_rotated_in_y()=0;
     virtual bool contains_element_with_id(unsigned int id)=0;
     [[nodiscard]] unsigned int get_id() const;
     [[nodiscard]] std::string get_properties() const override;

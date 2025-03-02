@@ -22,10 +22,10 @@ public:
 
 
     std::vector<std::vector<std::vector<Insertable_Element*>>>get_block_elements_pointers();
-
-    std::shared_ptr<Insertable_Element> get_element_rotated_in_y() override;
-    std::shared_ptr<Insertable_Element> get_element_rotated_in_x();
-    std::shared_ptr<Insertable_Element> get_element_rotated_in_z();
+    std::unique_ptr<Insertable_Element> get_element_copy() override;
+    std::unique_ptr<Insertable_Element> get_element_rotated_in_y() override;
+    std::unique_ptr<Insertable_Element> get_element_rotated_in_x() const;
+    std::unique_ptr<Insertable_Element> get_element_rotated_in_z() const;
 
     bool contains_element_with_id(unsigned int id) override;
 

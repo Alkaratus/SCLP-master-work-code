@@ -3,6 +3,7 @@
 //
 
 #include <algorithm>
+#include <memory>
 #include "Complex_Block.h"
 
 #include "../../Visitor/Visitor.h"
@@ -38,8 +39,12 @@ void Complex_Block::rotate_in_y() {
     set_width(get_width()^get_depth());
 }
 
-std::shared_ptr<Insertable_Element> Complex_Block::get_element_rotated_in_y() {
-    std::shared_ptr<Complex_Block>rotated(new Complex_Block(*this));
+std::unique_ptr<Insertable_Element> Complex_Block::get_element_copy() {
+    return std::make_unique<Complex_Block>(*this);
+}
+
+std::unique_ptr<Insertable_Element> Complex_Block::get_element_rotated_in_y() {
+    std::unique_ptr<Complex_Block>rotated(new Complex_Block(*this));
     rotated->rotate_in_y();
     return rotated;
 }

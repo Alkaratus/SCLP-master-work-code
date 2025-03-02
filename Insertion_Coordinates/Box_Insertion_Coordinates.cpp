@@ -11,6 +11,6 @@ std::string Box_Insertion_Coordinates::accept(I_Coordinates_Displayer* displayer
     return displayer->display_box_coordinates(this);
 }
 
-unsigned int Box_Insertion_Coordinates::get_element_id() {
+unsigned int Box_Insertion_Coordinates::get_element_id() const{
     return element_id;
 }

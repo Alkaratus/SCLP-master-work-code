@@ -26,6 +26,7 @@ public:
 
     [[nodiscard]] Element_3D get_sizes() const;
     virtual std::string accept(I_Coordinates_Displayer* displayer)=0;
+    [[nodiscard]] virtual unsigned int get_element_id() const=0;
 
 };
 

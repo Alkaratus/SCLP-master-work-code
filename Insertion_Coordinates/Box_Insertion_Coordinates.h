@@ -10,7 +10,7 @@ public:
     Box_Insertion_Coordinates(Point_3D start, Box *box);
     std::string accept(I_Coordinates_Displayer* displayer) override;
 
-    unsigned int get_element_id();
+    [[nodiscard]] unsigned int get_element_id() const override;
 };
 
 

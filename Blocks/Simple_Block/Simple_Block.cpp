@@ -3,9 +3,11 @@
 //
 
 #include "Simple_Block.h"
+
+#include <memory>
 #include "../Visitor/Visitor.h"
 
-using std::vector, std::shared_ptr;
+using std::vector, std::unique_ptr;
 
 
 Element_3D calculate_block_size(Insertable_Element* single_element_pointer,const Block_Elements_Numbers &elements_numbers);
@@ -98,15 +100,29 @@ bool Simple_Block::contains_element_with_id(const unsigned int id) {
     return false;
 }
 
-shared_ptr<Insertable_Element> Simple_Block::get_element_rotated_in_y() {
-    std::shared_ptr<Simple_Block>rotated(new Simple_Block(*this));
+vector<vector<vector<Insertable_Element*>>> Simple_Block::get_block_elements_pointers() {
+    return block_elements_pointers;
+}
+
+std::unique_ptr<Insertable_Element> Simple_Block::get_element_copy() {
+    return std::make_unique<Simple_Block>(*this);
+}
+
+unique_ptr<Insertable_Element> Simple_Block::get_element_rotated_in_y() {
+    std::unique_ptr<Simple_Block>rotated(new Simple_Block(*this));
     rotated->rotate_in_y();
     return rotated;
 }
 
-std::shared_ptr<Insertable_Element> Simple_Block::get_element_rotated_in_x() {
-    std::shared_ptr<Simple_Block>rotated(new Simple_Block(*this));
+std::unique_ptr<Insertable_Element> Simple_Block::get_element_rotated_in_x() const {
+    std::unique_ptr<Simple_Block>rotated(new Simple_Block(*this));
     rotated->rotate_in_x();
+    return rotated;
+}
+
+std::unique_ptr<Insertable_Element> Simple_Block::get_element_rotated_in_z() const {
+    std::unique_ptr<Simple_Block>rotated(new Simple_Block(*this));
+    rotated->rotate_in_z();
     return rotated;
 }
 
@@ -115,9 +131,6 @@ void Simple_Block::accept(Visitor *visitor) {
     visitor->visit(this);
 }
 
-vector<vector<vector<Insertable_Element*>>> Simple_Block::get_block_elements_pointers() {
-    return block_elements_pointers;
-}
 
 Element_3D calculate_block_size(const Element_3D &single_element,
                                 const Block_Elements_Numbers &elements_numbers) {

@@ -142,9 +142,9 @@ std::string Visualisation_Coordinates_Displayer::display_block_coordinates(Block
         data+=string(number_of_tabs,'\t')+R"("Item2":{)"+"\n";
         number_of_tabs++;
         data+=string(number_of_tabs,'\t')+R"("$id":")"+to_string(new_element_id++)+"\",\n";
-        data+=string(number_of_tabs,'\t')+R"("X":)"+to_string((*it)->get_start_point().get_x())+",\n";
-        data+=string(number_of_tabs,'\t')+R"("Y":)"+to_string((*it)->get_start_point().get_y())+",\n";
-        data+=string(number_of_tabs,'\t')+R"("Z":)"+to_string((*it)->get_start_point().get_z())+",\n";
+        data+=string(number_of_tabs,'\t')+R"("X":)"+to_string((*it)->get_start_point().get_x()-coordinates->get_start_point().get_x())+",\n";
+        data+=string(number_of_tabs,'\t')+R"("Y":)"+to_string((*it)->get_start_point().get_y()-coordinates->get_start_point().get_y())+",\n";
+        data+=string(number_of_tabs,'\t')+R"("Z":)"+to_string((*it)->get_start_point().get_z()-coordinates->get_start_point().get_z())+",\n";
         data+=string(number_of_tabs,'\t')+R"("Rotated": false)"+'\n';
         number_of_tabs--;
         data+=string(number_of_tabs,'\t')+"}\n";
