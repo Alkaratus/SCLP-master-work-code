@@ -31,6 +31,10 @@ unsigned int Element_3D::get_height() const {
     return height;
 }
 
+unsigned int Element_3D::get_base_surface() const {
+    return width*depth;
+}
+
 unsigned int Element_3D::get_volume() const {
     return width*depth*height;
 }

@@ -24,6 +24,7 @@ public:
     [[nodiscard]] unsigned int get_width() const;
     [[nodiscard]] unsigned int get_depth() const;
     [[nodiscard]] unsigned int get_height() const;
+    [[nodiscard]] unsigned int get_base_surface() const;
     [[nodiscard]] unsigned int get_volume() const;
 
     bool operator==(const Element_3D &other)const;
