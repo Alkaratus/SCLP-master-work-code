@@ -5,6 +5,8 @@ project(masters_work)
 set(CMAKE_CXX_STANDARD 17)
 
 add_subdirectory(main)
+add_subdirectory(Trials)
+
 add_subdirectory(Blocks)
 add_subdirectory(Block_Elements_Numbers)
 add_subdirectory(Box)
@@ -19,5 +21,7 @@ add_subdirectory(Packer)
 add_subdirectory(Packer_Parser)
 add_subdirectory(Points)
 add_subdirectory(Visitor)
+
+
 enable_testing()
 add_subdirectory(Tests)
