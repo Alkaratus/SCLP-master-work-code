@@ -121,9 +121,9 @@ list<std::shared_ptr<Container::Free_Space>> Container::Free_Space::add_free_spa
 
 list<shared_ptr<Container::Free_Space>>Container::Free_Space::create_free_space_from_related_free_spaces(A_Insertion_Coordinates * inserted_element_coordinates) {
     list<shared_ptr<Free_Space>> new_free_spaces;
-    auto insertion_wider_point= inserted_element_coordinates->get_wider_point();
-    auto insertion_deeper_point=inserted_element_coordinates->get_deeper_point();
-    auto insertion_end_point=inserted_element_coordinates->get_end_point();
+    const auto insertion_wider_point= inserted_element_coordinates->get_wider_point();
+    const auto insertion_deeper_point=inserted_element_coordinates->get_deeper_point();
+    const auto insertion_end_point=inserted_element_coordinates->get_end_point();
     auto it=related_free_spaces.begin();
     while(it!=related_free_spaces.end()){
         bool related_free_space_affected=false;

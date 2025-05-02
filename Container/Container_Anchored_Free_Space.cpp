@@ -15,7 +15,7 @@ shared_ptr<Container::Free_Space> Container::Anchored_Free_Space::create_free_sp
         const A_Insertion_Coordinates *inserted_element_coordinates) {
     auto insertion_start_point = inserted_element_coordinates->get_start_point();
     auto inserted_element = inserted_element_coordinates->get_sizes();
-    return make_shared<Container::Anchored_Free_Space>(Point_3D(insertion_start_point.get_x(),insertion_start_point.get_y()+inserted_element.get_height(),insertion_start_point.get_z()),
+    return make_shared<Anchored_Free_Space>(Point_3D(insertion_start_point.get_x(),insertion_start_point.get_y()+inserted_element.get_height(),insertion_start_point.get_z()),
                                                        inserted_element.get_width(),inserted_element.get_depth(),
                                                        get_height()-inserted_element.get_height(),get_owner());
 }
@@ -147,26 +147,26 @@ std::unique_ptr<A_Insertion_Coordinates> Container::Anchored_Free_Space::get_ins
 }
 
 shared_ptr<Container::Free_Space> Container::Anchored_Free_Space::get_slice_on_left_from(unsigned int point_x_value) {
-    return std::make_shared<Container::Anchored_Free_Space>(get_start_corner(), point_x_value - get_start_corner().get_x(), get_depth(),
+    return std::make_shared<Anchored_Free_Space>(get_start_corner(), point_x_value - get_start_corner().get_x(), get_depth(),
                                                             get_height(), get_owner());
 }
 
 shared_ptr<Container::Free_Space> Container::Anchored_Free_Space::get_slice_on_right_from(unsigned int point_x_value) {
     auto new_free_space_start=get_start_corner();
     new_free_space_start.set_x(new_free_space_start.get_x() + point_x_value);
-    return std::make_shared<Container::Anchored_Free_Space>(new_free_space_start, get_start_corner().get_x() + get_width() - point_x_value,
+    return std::make_shared<Anchored_Free_Space>(new_free_space_start, get_start_corner().get_x() + get_width() - point_x_value,
                                                             get_depth(),get_height(), get_owner());
 }
 
 shared_ptr<Container::Free_Space> Container::Anchored_Free_Space::get_slice_on_front_from(unsigned int point_z_value) {
-    return std::make_shared<Container::Anchored_Free_Space>(get_start_corner(), get_width(), point_z_value- get_start_corner().get_z(),
+    return std::make_shared<Anchored_Free_Space>(get_start_corner(), get_width(), point_z_value- get_start_corner().get_z(),
                                                             get_height(), get_owner());
 }
 
 shared_ptr<Container::Free_Space> Container::Anchored_Free_Space::get_slice_on_back_from(unsigned int point_z_value) {
     auto new_free_space_start=get_start_corner();
     new_free_space_start.set_z(new_free_space_start.get_z()+point_z_value);
-    return std::make_unique<Container::Anchored_Free_Space>(new_free_space_start, get_width(), get_start_corner().get_z()+get_depth() - point_z_value,
+    return std::make_unique<Anchored_Free_Space>(new_free_space_start, get_width(), get_start_corner().get_z()+get_depth() - point_z_value,
                                                             get_height(), get_owner());
 }
 
