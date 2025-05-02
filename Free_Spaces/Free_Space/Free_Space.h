@@ -12,6 +12,10 @@ class Free_Space:public Element_3D {
     static unsigned int next_id;
     unsigned int id;
     Point_3D start_point;
+
+    [[nodiscard]] bool share_x_zone_with(const Free_Space &other) const;
+    [[nodiscard]] bool share_z_zone_with(const Free_Space &other) const;
+
 public:
     Free_Space(const Point_3D &start, unsigned int width, unsigned int depth, unsigned int height);
 

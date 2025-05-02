@@ -6,6 +6,18 @@
 
 unsigned int Free_Space::next_id=0;
 
+bool Free_Space::share_x_zone_with(const Free_Space &other) const {
+    return get_start_corner().get_x()<=other.get_start_corner().get_x()?
+        other.get_start_corner().get_x()<get_end_corner().get_x():
+    get_start_corner().get_x()<other.get_end_corner().get_x();
+}
+
+bool Free_Space::share_z_zone_with(const Free_Space &other) const {
+    return get_start_corner().get_z()<=other.get_start_corner().get_z()?
+            other.get_start_corner().get_z()<get_end_corner().get_z():
+        get_start_corner().get_z()<other.get_end_corner().get_z();
+}
+
 Free_Space::Free_Space(const Point_3D &start, const unsigned int width, const unsigned int depth, const unsigned int height):
         Element_3D(width,depth,height), id(++next_id), start_point(start){
 
@@ -52,20 +64,7 @@ unsigned int Free_Space::get_id() const {
 }
 
 bool Free_Space::is_related_with_another(const Free_Space &other) const {
-    if(get_start_corner()==other.get_start_corner() || get_wider_corner()==other.get_wider_corner() || get_deeper_corner()==other.get_deeper_corner() ||
-    get_end_corner()==other.get_end_corner()) {
-        return true;
-    }
-    if(
-    get_start_corner().get_z()<=other.get_start_corner().get_z()&& get_deeper_corner().get_z()>other.get_start_corner().get_z() &&
-    other.get_start_corner().get_x()<=get_start_corner().get_x()&& other.get_wider_corner().get_x()>get_start_corner().get_x() ||
-    get_start_corner().get_x()<=other.get_start_corner().get_x()&& get_wider_corner().get_x()>other.get_start_corner().get_x() &&
-    other.get_start_corner().get_z()<=get_start_corner().get_z()&& other.get_deeper_corner().get_z()>get_start_corner().get_z()
-
-    ) {
-        return true;
-    }
-    return false;
+    return share_x_zone_with(other) && share_z_zone_with(other);
 }
 
 bool Free_Space::is_inside_another(const Free_Space &other) const {
