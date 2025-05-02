@@ -22,7 +22,7 @@ void Insertion_Coordinates_Factory::visit(Simple_Block *block) {
                 auto element_start_point=start_point;
                 element_start_point.set_x(start_point.get_x()+elements_set[i][j][k]->get_width()*k);
                 element_start_point.set_z(start_point.get_z()+elements_set[i][j][k]->get_depth()*j);
-                element_start_point.set_y(start_point.get_y()+elements_set[i][j][k]->get_depth()*i);
+                element_start_point.set_y(start_point.get_y()+elements_set[i][j][k]->get_height()*i);
                 sub_elements.emplace_back(another_factory.create_insertion_coordinate(elements_set[i][j][k],element_start_point));
             }
         }
