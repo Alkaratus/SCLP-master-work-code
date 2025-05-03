@@ -1,12 +1,21 @@
 #include "Packer.h"
-#include <iostream>
+
+#include <map>
+#include <stdexcept>
+
 #include "Complex_Block.h"
 #include "Simple_Block.h"
 
 using std::list, std::shared_ptr, std::vector;
 
-Packer::Packer(const list<Box>& boxes, const Container& container):A_Packer(convert_boxes_to_elements(boxes),container){
+Packer::Packer(const list<Box>& boxes, const Container& container,Element_Selecting_Method method):A_Packer(convert_boxes_to_elements(boxes),container){
+    const std::map<Element_Selecting_Method,std::function<Insertable_Element*(Packer*,Free_Space &selected_free_space)>> selection_methods={
+        {by_max_volume,select_element_by_volume},
+        {by_max_surface,select_element_by_surface},
+        {by_first_satisfying_element,select_element_by_first_satisfying_element}
+    };
     create_blocks();
+    select_method= selection_methods.at(method);
 }
 
 list<std::unique_ptr<A_Insertion_Coordinates>> Packer::pack() {
@@ -14,19 +23,19 @@ list<std::unique_ptr<A_Insertion_Coordinates>> Packer::pack() {
     while((!get_elements().empty())&&(get_container().have_free_space_available())){
         auto free_space_iterator=get_container().select_free_space();
         auto free_space=*(*free_space_iterator);
-        if(auto element= select_element(free_space); element!= nullptr){
+        if(auto element= select_method(this,free_space); element!= nullptr){
             packing_coordinates.emplace_back(get_container().insert_element_into_free_space(free_space_iterator,element));
             delete_element(element);
         }
         else{
             get_container().remove_free_space(*free_space_iterator);
         }
-        std::cout<<get_container().get_text_list_of_free_spaces()<<std::endl;
+        //std::cout<<get_container().get_text_list_of_free_spaces()<<std::endl;
     }
     return packing_coordinates;
 }
 
-Insertable_Element *Packer::select_element(Free_Space &selected_free_space){
+Insertable_Element *Packer::select_element_by_volume(const Free_Space &selected_free_space){
     Insertable_Element* best_fill_element=nullptr;
     unsigned int best_fill_ratio=0;
     for(auto &element:get_elements()){
@@ -40,6 +49,26 @@ Insertable_Element *Packer::select_element(Free_Space &selected_free_space){
     }
     return best_fill_element;
 }
+
+Insertable_Element * Packer::select_element_by_surface(const Free_Space &selected_free_space) {
+    Insertable_Element* best_fill_element=nullptr;
+    unsigned int best_fill_ratio=0;
+    for(auto &element:get_elements()){
+        if(selected_free_space.can_element_be_inserted(element.get())){
+            auto fill_ratio= element->get_base_surface() * FILL_SCALE / selected_free_space.get_base_surface();
+            if(fill_ratio > best_fill_ratio){
+                best_fill_ratio=fill_ratio;
+                best_fill_element=element.get();
+            }
+        }
+    }
+    return best_fill_element;
+}
+
+Insertable_Element * Packer::select_element_by_first_satisfying_element(const Free_Space &selected_free_space) {
+    throw std::logic_error("This function is not implemented yet");
+}
+
 
 void Packer::create_blocks() {
     get_elements().sort(compare_elements_ptr_by_lengths);

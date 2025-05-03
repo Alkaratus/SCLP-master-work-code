@@ -41,6 +41,11 @@ list<std::unique_ptr<A_Insertion_Coordinates>> Scenerio_Tree_Packer::pack_one_el
     auto free_space_iterator=get_container().select_free_space();
     auto free_space=*(*free_space_iterator);
     auto elements_ids=select_elements_to_pack_ids(free_space,scenerio_level);
+
+    if(elements_ids.empty()) {
+        get_container().remove_free_space(*free_space_iterator);
+        return {};
+    }
     // tworzenie packerów do prób
     std::vector<std::unique_ptr<Scenerio_Tree_Packer>> test_packers(scenerios_number_in_level[scenerio_level]);
     for(unsigned int i=0;i<scenerios_number_in_level[scenerio_level];i++) {
@@ -51,20 +56,22 @@ list<std::unique_ptr<A_Insertion_Coordinates>> Scenerio_Tree_Packer::pack_one_el
     std::list<std::list<std::unique_ptr<A_Insertion_Coordinates>>> scenerios;
     for (unsigned int i=0;i<elements_ids.size();i++) {
         std::list<std::unique_ptr<A_Insertion_Coordinates>> insertions;
-        auto selected_free_space=test_packers[i]->get_container().select_free_space();
+        auto selected_free_space=test_packers[i]->get_container().select_free_space();;
         auto element_to_pack=test_packers[i]->get_element_by_id(elements_ids[i].first);
         auto rotated= element_to_pack->get_element_rotated_in_y();
         if(!(*selected_free_space)->can_element_be_inserted(element_to_pack)) {
             element_to_pack=rotated.get();
         }
-        insertions.emplace_back(test_packers[i]->get_container().insert_element_into_free_space(selected_free_space,element_to_pack));
-        test_packers[i]->delete_element(element_to_pack);
-
         if(scenerio_level+1!=levels_number) {
+            insertions.emplace_back(test_packers[i]->get_container().insert_element_into_free_space(selected_free_space,element_to_pack));
+            test_packers[i]->delete_element(element_to_pack);
             auto next_elements=test_packers[i]->pack_one_element(scenerio_level+1);
             for(auto &element : next_elements) {
                 insertions.emplace_back(std::move(element));
             }
+        }
+        else {
+            insertions.emplace_back(selected_free_space->get()->get_insertion_coordinates_for_element(element_to_pack));
         }
         scenerios.emplace_back(std::move(insertions));
     }
@@ -101,10 +108,15 @@ void Scenerio_Tree_Packer::create_blocks() {
 
 
 list<std::unique_ptr<A_Insertion_Coordinates>> Scenerio_Tree_Packer::pack() {
+    //std::cout<<get_container().get_text_list_of_free_spaces()<<std::endl;
     list<std::unique_ptr<A_Insertion_Coordinates>> packing_coordinates;
     while((!get_elements().empty())&&(get_container().have_free_space_available())) {
         auto best_scenerio=pack_one_element(0);
         auto selected_free_space=get_container().select_free_space();
+        if(best_scenerio.empty()) {
+            //std::cout<<get_container().get_text_list_of_free_spaces()<<std::endl;
+            continue;
+        }
         auto element_to_pack=get_element_by_id((*best_scenerio.begin())->get_element_id());
         auto rotated= element_to_pack->get_element_rotated_in_y();
         if(!(*selected_free_space)->can_element_be_inserted(element_to_pack)) {
@@ -112,7 +124,7 @@ list<std::unique_ptr<A_Insertion_Coordinates>> Scenerio_Tree_Packer::pack() {
         }
         packing_coordinates.emplace_back(get_container().insert_element_into_free_space(selected_free_space,element_to_pack));
         delete_element(element_to_pack);
-        std::cout<<get_container().get_text_list_of_free_spaces()<<std::endl;
+        //std::cout<<get_container().get_text_list_of_free_spaces()<<std::endl;
     }
     return packing_coordinates;
 }
@@ -192,10 +204,11 @@ std::vector<pair<unsigned int,unsigned int>> Scenerio_Tree_Packer::select_elemen
     unsigned int i=0;
     while(i<scenerios_number_in_level[level_number] && elements_it!=get_elements().end()) {
         auto fulfill=(*elements_it)->get_volume() * FILL_SCALE / selected_free_space.get_volume();
-        if(fulfill<=FILL_SCALE) {
+        if(selected_free_space.can_element_be_inserted((*elements_it).get())) {
             elements_id_and_fulfill.emplace_back((*elements_it)->get_id(),fulfill);
+            ++i;
         }
-        i++;
+
         ++elements_it;
     }
 
