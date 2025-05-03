@@ -6,8 +6,10 @@
 #include "Container.h"
 
 std::vector<std::pair<Container,std::list<Box>>> read_file(const std::string& filename);
+std::pair<Container,std::list<Box>>read_pair(std::istream& stream);
 
 void simple_packer_trial();
 void tree_packer_trial();
+void mock_up_trial();
 
 #endif //TRIALS_H
