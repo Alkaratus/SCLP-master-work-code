@@ -5,13 +5,21 @@
 #include "Container.h"
 #include <algorithm>
 #include <iostream>
+#include <map>
+#include <numeric>
 
 using std::list, std::shared_ptr, std::make_shared;
 
 ///Container
 
-Container::Container(unsigned int width, unsigned int depth, unsigned int height):
+Container::Container(unsigned int width, unsigned int depth, unsigned int height,Free_Space_Selection_Method selection_method):
         Element_3D(width,depth,height), sizes(width,depth,height){
+
+    const std::map<Free_Space_Selection_Method,std::function<list<shared_ptr<Free_Space>>::iterator(Container*)>> selection_methods={
+        {anchor_distance, select_free_space_by_anchor_distance},
+        {manhattan_distance,select_free_space_by_manhattan_distance}
+    };
+    free_space_select_method=selection_methods.at(selection_method);
     free_spaces.emplace_back(make_shared<Free_Space>(Point_3D(0,0,0),width,depth,height,this));
 }
 
@@ -20,6 +28,7 @@ Container::Container(const Container &other): Element_3D(other), sizes(other.siz
         free_spaces.emplace_back(make_shared<Free_Space>(free_space->get_start_corner(),free_space->get_width(),
             free_space->get_depth(),free_space->get_height(),this));
     }
+    free_space_select_method=other.free_space_select_method;
 }
 
 void Container::remove_inserted_spaces() {
@@ -52,8 +61,18 @@ void Container::remove_inserted_spaces() {
     }
 }
 
-list<shared_ptr<Container::Free_Space>>::iterator Container::select_free_space() {
+list<shared_ptr<Container::Free_Space>>::iterator Container::select_free_space_by_anchor_distance() {
     return free_spaces.begin();
+}
+
+std::list<std::shared_ptr<Container::Free_Space>>::iterator Container::select_free_space_by_manhattan_distance() {
+    auto best= free_spaces.begin();
+    for(auto it=free_spaces.begin();it!=free_spaces.end();++it) {
+        if(compare_free_space_manhattan_lengths(*it,*best)) {
+            best=it;
+        }
+    }
+    return best;
 }
 
 void Container::add_relation_between_free_spaces(const shared_ptr<Free_Space>& first, const shared_ptr<Free_Space>& second) {
@@ -68,13 +87,20 @@ bool Container::compare_free_spaces_anchors_lengths(shared_ptr<Free_Space> &firs
     return is_first_anchor_smaller_than_second(first->get_anchor_lengths(),second->get_anchor_lengths());
 }
 
+bool Container::compare_free_space_manhattan_lengths(const shared_ptr<Free_Space> &first, const shared_ptr<Free_Space> &second) {
+    auto first_lengths=first->get_anchor_lengths();
+    auto first_distance=std::accumulate(first_lengths.begin(),first_lengths.end(),0);
+    auto second_lengths=second->get_anchor_lengths();
+    auto second_distance=std::accumulate(second_lengths.begin(),second_lengths.end(),0);
+    return first_distance<second_distance;
+}
+
 bool Container::compare_free_spaces_by_y_coordinate(shared_ptr<Free_Space> &first,
                                                     shared_ptr<Free_Space> &last) {
     return first->get_anchor_corner().get_y() < last->get_anchor_corner().get_y();
 }
 
-void Container::mark_relations_between_free_spaces_in_lists(list<std::shared_ptr<Free_Space>> &first,
-                                                            list<std::shared_ptr<Free_Space>> &second) {
+void Container::mark_relations_between_free_spaces_in_lists(list<shared_ptr<Free_Space>> &first,list<shared_ptr<Free_Space>> &second) {
     auto it=first.begin();
     auto jt=second.begin();
     while (it!=first.end()){
@@ -89,7 +115,7 @@ void Container::mark_relations_between_free_spaces_in_lists(list<std::shared_ptr
     }
 }
 
-void Container::remove_inserted_spaces_from_list(list<std::shared_ptr<Free_Space>> &merged_free_spaces) {
+void Container::remove_inserted_spaces_from_list(list<shared_ptr<Free_Space>> &merged_free_spaces) {
     auto it=merged_free_spaces.begin();
     auto jt=merged_free_spaces.begin();
     jt++;
@@ -176,14 +202,14 @@ bool Container::cant_element_be_inserted(Insertable_Element* element) const {
            sizes.get_height()<element->get_height();
 }
 
-void Container::remove_free_space(shared_ptr<Free_Space> &space) {
-    for(auto it=free_spaces.begin();it!=free_spaces.end();it++){
+void Container::remove_free_space(const shared_ptr<Free_Space> &space) {
+    for(auto it=free_spaces.begin();it!=free_spaces.end();++it){
         if(it->get()==space.get()){
             auto related_free_spaces=it->get()->get_related_free_spaces();
             for(const auto& related_free_space:related_free_spaces){
                 related_free_space->remove_related_free_space(*it);
             }
-            auto next=free_spaces.erase(it);
+            free_spaces.erase(it);
             return;
         }
     }
@@ -199,6 +225,10 @@ std::string Container::get_text_list_of_free_spaces() const {
 
 bool Container::have_free_space_available() {
     return (!free_spaces.empty());
+}
+
+std::list<std::shared_ptr<Container::Free_Space>>::iterator Container::select_free_space() {
+    return free_space_select_method(this);
 }
 
 void Container::make_merges_for_new(std::shared_ptr<Free_Space> &space) {
@@ -299,8 +329,6 @@ void Container::make_merges_for_new(std::shared_ptr<Free_Space> &space) {
         new_free_spaces=merged_free_spaces;
         merged_free_spaces.clear();
     }
-
-
 }
 
 shared_ptr<Container::Free_Space> Container::create_merge_in_x(const shared_ptr<Free_Space> &first, const shared_ptr<Free_Space> &second) {
@@ -365,10 +393,10 @@ bool is_first_anchor_smaller_than_second(std::array<unsigned int,3> first, std::
     return first[2]<second[2];
 }
 
-float calculate_container_usage(const Container &container,std::list<std::unique_ptr<A_Insertion_Coordinates>> &insertions) {
+double calculate_container_usage(const Container &container,std::list<std::unique_ptr<A_Insertion_Coordinates>> &insertions) {
     unsigned int volume=0;
     for(const auto &insertion: insertions) {
         volume+=insertion->get_sizes().get_volume();
     }
-    return static_cast<float>(volume)/static_cast<float>(container.get_volume());
+    return static_cast<double>(volume)/static_cast<double>(container.get_volume());
 }

@@ -7,6 +7,7 @@
 
 #include <list>
 #include <array>
+#include <functional>
 #include "Element_3D.h"
 #include "Free_Space.h"
 #include "Insertable_Element.h"
@@ -82,10 +83,12 @@ class Container:public Element_3D {
 
     std::list<std::shared_ptr<Free_Space>>free_spaces; ///< Collection of free spaces
     Element_3D sizes; ///
+    std::function<std::list<std::shared_ptr<Free_Space>>::iterator(Container*)> free_space_select_method;
 
     static void add_relation_between_free_spaces(const std::shared_ptr<Free_Space>& first, const std::shared_ptr<Free_Space>& second);
 
     static bool compare_free_spaces_anchors_lengths(std::shared_ptr<Free_Space>& first,std::shared_ptr<Free_Space> &last);
+    static bool compare_free_space_manhattan_lengths(const std::shared_ptr<Free_Space>& first, const std::shared_ptr<Free_Space> &second);
     static bool compare_free_spaces_by_y_coordinate(std::shared_ptr<Free_Space>& first, std::shared_ptr<Free_Space> &last);
     static void mark_relations_between_free_spaces_in_lists(std::list<std::shared_ptr<Free_Space>> &first, std::list<std::shared_ptr<Free_Space>>& second);
 
@@ -94,16 +97,22 @@ class Container:public Element_3D {
     std::list<std::shared_ptr<Free_Space>>::iterator get_last_element_with_same_y_after(std::list<std::shared_ptr<Free_Space>>::iterator first);
     ///Removes spaces which are inserted in another
     void remove_inserted_spaces();
+    std::list<std::shared_ptr<Free_Space>>::iterator select_free_space_by_anchor_distance();
+    std::list<std::shared_ptr<Free_Space>>::iterator select_free_space_by_manhattan_distance();
 
 public:
-    Container(unsigned int width,unsigned int depth,unsigned int height);
+    enum Free_Space_Selection_Method {
+        anchor_distance, manhattan_distance
+    };
+
+    Container(unsigned int width,unsigned int depth,unsigned int height, Free_Space_Selection_Method selection_method=anchor_distance);
     Container(const Container& other);
     bool have_free_space_available();
     std::list<std::shared_ptr<Free_Space>>::iterator select_free_space();
     std::unique_ptr<A_Insertion_Coordinates> insert_element_into_free_space(std::list<std::shared_ptr<Free_Space>>::iterator free_space,Insertable_Element* element);
     ///Checks if element can't be definitely inserted into container BUT it doesn't check can element be inserted
     bool cant_element_be_inserted(Insertable_Element* element) const;
-    void remove_free_space(std::shared_ptr<Free_Space> &space);
+    void remove_free_space(const std::shared_ptr<Free_Space> &space);
     [[nodiscard]] std::string get_text_list_of_free_spaces() const;
     void make_merges_for_new(std::shared_ptr<Free_Space> &space);
     std::shared_ptr<Free_Space> create_merge_in_x(const std::shared_ptr<Free_Space>& first,const std::shared_ptr<Free_Space>& second);
@@ -112,5 +121,5 @@ public:
 
 bool is_first_anchor_smaller_than_second(std::array<unsigned int,3> first, std::array<unsigned int,3> second);
 
-float calculate_container_usage(const Container &container,std::list<std::unique_ptr<A_Insertion_Coordinates>> &insertions);
+double calculate_container_usage(const Container &container,std::list<std::unique_ptr<A_Insertion_Coordinates>> &insertions);
 #endif //MASTERS_WORK_CONTAINER_H
