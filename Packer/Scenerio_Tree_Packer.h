@@ -10,13 +10,14 @@
 
 
 class Scenerio_Tree_Packer: public A_Packer {
+    double volume_lost_ratio=1;
     unsigned int levels_number;
     std::vector<unsigned int> scenerios_number_in_level;
 
     std::vector<std::pair<unsigned int,unsigned int>> select_elements_to_pack_ids(Free_Space &selected_free_space,unsigned int level_number);
     Insertable_Element* get_element_by_id(unsigned int id);
 
-    std::list<std::unique_ptr<A_Insertion_Coordinates>>pack_one_element(unsigned int scenerio_level);
+    std::list<std::pair<std::unique_ptr<A_Insertion_Coordinates>,int>>pack_one_element(unsigned int scenerio_level);
 
     void create_blocks();
     void delete_element(Insertable_Element *element);

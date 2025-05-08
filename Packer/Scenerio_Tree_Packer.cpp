@@ -25,7 +25,7 @@ Scenerio_Tree_Packer::Scenerio_Tree_Packer(Scenerio_Tree_Packer &other):A_Packer
 scenerios_number_in_level(other.scenerios_number_in_level){
 }
 
-Insertable_Element * Scenerio_Tree_Packer::get_element_by_id(unsigned int id) {
+Insertable_Element * Scenerio_Tree_Packer::get_element_by_id(const unsigned int id) {
     for(const auto& element:get_elements()) {
         if(element->get_id() == id) {
             return element.get();
@@ -34,7 +34,7 @@ Insertable_Element * Scenerio_Tree_Packer::get_element_by_id(unsigned int id) {
     return nullptr;
 }
 
-list<std::unique_ptr<A_Insertion_Coordinates>> Scenerio_Tree_Packer::pack_one_element(unsigned int scenerio_level) {
+list<std::pair<std::unique_ptr<A_Insertion_Coordinates>,int>> Scenerio_Tree_Packer::pack_one_element(unsigned int scenerio_level) {
     if(!get_container().have_free_space_available()) {
         return {};
     }
@@ -53,17 +53,23 @@ list<std::unique_ptr<A_Insertion_Coordinates>> Scenerio_Tree_Packer::pack_one_el
     }
 
     //Tworzenie scenariuszy
-    std::list<std::list<std::unique_ptr<A_Insertion_Coordinates>>> scenerios;
+    list<list<std::pair<std::unique_ptr<A_Insertion_Coordinates>,int>>> scenerios;
     for (unsigned int i=0;i<elements_ids.size();i++) {
-        std::list<std::unique_ptr<A_Insertion_Coordinates>> insertions;
-        auto selected_free_space=test_packers[i]->get_container().select_free_space();;
+        list<std::pair<std::unique_ptr<A_Insertion_Coordinates>,int>> insertions;
+        auto selected_free_space=test_packers[i]->get_container().select_free_space();
         auto element_to_pack=test_packers[i]->get_element_by_id(elements_ids[i].first);
+
+        auto free_space_volume=selected_free_space->get()->get_volume();
+        auto element_volume= element_to_pack->get_volume();
+        auto mark= element_volume- volume_lost_ratio*(free_space_volume -element_volume);
         auto rotated= element_to_pack->get_element_rotated_in_y();
         if(!(*selected_free_space)->can_element_be_inserted(element_to_pack)) {
             element_to_pack=rotated.get();
         }
         if(scenerio_level+1!=levels_number) {
-            insertions.emplace_back(test_packers[i]->get_container().insert_element_into_free_space(selected_free_space,element_to_pack));
+            auto insertion=test_packers[i]->get_container().insert_element_into_free_space(selected_free_space,element_to_pack);
+
+            insertions.emplace_back(std::move(insertion),mark);
             test_packers[i]->delete_element(element_to_pack);
             auto next_elements=test_packers[i]->pack_one_element(scenerio_level+1);
             for(auto &element : next_elements) {
@@ -71,20 +77,20 @@ list<std::unique_ptr<A_Insertion_Coordinates>> Scenerio_Tree_Packer::pack_one_el
             }
         }
         else {
-            insertions.emplace_back(selected_free_space->get()->get_insertion_coordinates_for_element(element_to_pack));
+            insertions.emplace_back(selected_free_space->get()->get_insertion_coordinates_for_element(element_to_pack),mark);
         }
         scenerios.emplace_back(std::move(insertions));
     }
 
     //Porównanie scenariuszy
-    auto iterator_on_best=std::max_element(scenerios.begin(),scenerios.end(),[](const std::list<std::unique_ptr<A_Insertion_Coordinates>> &first,
-    const std::list<std::unique_ptr<A_Insertion_Coordinates>> &second) {
+    auto iterator_on_best=std::max_element(scenerios.begin(),scenerios.end(),[](const list<std::pair<std::unique_ptr<A_Insertion_Coordinates>,int>> &first,
+    const list<std::pair<std::unique_ptr<A_Insertion_Coordinates>,int>> &second) {
         unsigned sum_first=0, sum_second=0;
         for(auto & it : first) {
-            sum_first+=it->get_sizes().get_volume();
+            sum_first+=it.second;
         }
         for(auto & it :second) {
-            sum_second+=it->get_sizes().get_volume();
+            sum_second+=it.second;
         }
         return sum_first<sum_second;
     });
@@ -117,7 +123,7 @@ list<std::unique_ptr<A_Insertion_Coordinates>> Scenerio_Tree_Packer::pack() {
             //std::cout<<get_container().get_text_list_of_free_spaces()<<std::endl;
             continue;
         }
-        auto element_to_pack=get_element_by_id((*best_scenerio.begin())->get_element_id());
+        auto element_to_pack=get_element_by_id((*best_scenerio.begin()).first->get_element_id());
         auto rotated= element_to_pack->get_element_rotated_in_y();
         if(!(*selected_free_space)->can_element_be_inserted(element_to_pack)) {
             element_to_pack=rotated.get();
