@@ -7,6 +7,8 @@
 #include <iostream>
 #include <sstream>
 #include "Trials.h"
+
+#include "Insertion_Coordinates_Displayer.h"
 #include "Packer.h"
 #include "Scenerio_Tree_Packer.h"
 
@@ -112,4 +114,16 @@ void mock_up_trial() {
     }
 }
 
-
+void compare_packers(int file_index, int dataset) {
+    auto data=read_file("BR data set\\br"+std::to_string(file_index)+".txt");
+    auto [container,boxes]=data[dataset];
+    Packer packer(boxes,container,Packer::by_max_volume);
+    Scenerio_Tree_Packer tree_packer(boxes,container,2,{2,2});
+    auto packer_results=packer.pack();
+    auto tree_packer_results=tree_packer.pack();
+    std::cout<<"Simple Packer effectiveness: "<<calculate_container_usage(container,packer_results)<<"\n";
+    std::cout<<"Tree Packer effectiveness: "<<calculate_container_usage(container,tree_packer_results)<<"\n";
+    std::cout<<Insertion_Coordinates_Displayer().display_all_coordinates_in_list(packer_results);
+    std::cout<<"\n";
+    std::cout<<Insertion_Coordinates_Displayer().display_all_coordinates_in_list(tree_packer_results);
+}
