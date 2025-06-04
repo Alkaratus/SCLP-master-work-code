@@ -6,7 +6,10 @@ add_library(${lib_name}
         A_Packer.cpp
         A_Packer.h
         Scenerio_Tree_Packer.h
-        Scenerio_Tree_Packer.cpp)
+        Scenerio_Tree_Packer.cpp
+        Parallel_Tree_Packer.h
+        Parallel_Tree_Packer.cpp
+)
 
 target_link_libraries(${lib_name} PUBLIC Container Visitor Box Elements_Group Simple_Block Complex_Block)
 

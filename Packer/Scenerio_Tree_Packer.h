@@ -16,8 +16,7 @@ class Scenerio_Tree_Packer: public A_Packer {
 
     std::vector<std::pair<unsigned int,unsigned int>> select_elements_to_pack_ids(Free_Space &selected_free_space,unsigned int level_number);
     Insertable_Element* get_element_by_id(unsigned int id);
-
-    std::list<std::pair<std::unique_ptr<A_Insertion_Coordinates>,int>>pack_one_element(unsigned int scenerio_level);
+    std::list<std::pair<std::unique_ptr<A_Insertion_Coordinates>,int>>find_best_scenerio(unsigned int scenerio_level);
 
     void create_blocks();
     void delete_element(Insertable_Element *element);
@@ -30,6 +29,8 @@ public:
     void visit(Box *box) override;
     void visit(Simple_Block *block) override;
     void visit(Complex_Block *block) override;
+
+    friend class Test;
 };
 
 

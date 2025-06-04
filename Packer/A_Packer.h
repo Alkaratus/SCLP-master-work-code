@@ -29,6 +29,7 @@ class A_Packer: public Visitor {
 protected:
     A_Packer(const std::list<std::unique_ptr<Insertable_Element>>& elements,const Container& container);
     A_Packer(const A_Packer& other);
+    A_Packer(const A_Packer* other);
     std::list<std::unique_ptr<Insertable_Element>>& get_elements();
     Container& get_container();
 

@@ -23,3 +23,8 @@ TEST_CASE("Get Insertable Element Rotation"){
     REQUIRE(rotated->get_width()==element.get_depth());
     REQUIRE(rotated->get_depth()==element.get_width());
 }
+
+TEST_CASE("Check Block Creation") {
+    Test test;
+    test.test_blocks_creation();
+}

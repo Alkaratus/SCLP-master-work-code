@@ -1,21 +1,28 @@
 #include "Packer.h"
 
+#include <iostream>
 #include <map>
 #include <stdexcept>
 
 #include "Complex_Block.h"
 #include "Simple_Block.h"
+#include "Parallel_Tree_Packer.h"
 
 using std::list, std::shared_ptr, std::vector;
 
+const std::map<Packer::Element_Selecting_Method,std::function<Insertable_Element*(Packer*,Free_Space &)>> Packer::selection_methods={
+    {by_max_volume,select_element_by_volume},
+    {by_max_surface,select_element_by_surface},
+    {by_first_satisfying_element,select_element_by_first_satisfying_element}
+};
+
 Packer::Packer(const list<Box>& boxes, const Container& container,Element_Selecting_Method method):A_Packer(convert_boxes_to_elements(boxes),container){
-    const std::map<Element_Selecting_Method,std::function<Insertable_Element*(Packer*,Free_Space &selected_free_space)>> selection_methods={
-        {by_max_volume,select_element_by_volume},
-        {by_max_surface,select_element_by_surface},
-        {by_first_satisfying_element,select_element_by_first_satisfying_element}
-    };
+
     create_blocks();
     select_method= selection_methods.at(method);
+}
+
+Packer::Packer(const Parallel_Tree_Packer *other):A_Packer(other) {
 }
 
 list<std::unique_ptr<A_Insertion_Coordinates>> Packer::pack() {
@@ -30,9 +37,23 @@ list<std::unique_ptr<A_Insertion_Coordinates>> Packer::pack() {
         else{
             get_container().remove_free_space(*free_space_iterator);
         }
-        //std::cout<<get_container().get_text_list_of_free_spaces()<<std::endl;
+
     }
     return packing_coordinates;
+}
+
+std::unique_ptr<A_Insertion_Coordinates> Packer::pack_single_element(Insertable_Element *element) {
+    auto free_space_iterator=get_container().select_free_space();
+    return get_container().insert_element_into_free_space(free_space_iterator,element);
+}
+
+Insertable_Element * Packer::get_element_by_id(const unsigned int id) {
+    for(const auto& element:get_elements()) {
+        if(element->get_id() == id) {
+            return element.get();
+        }
+    }
+    return nullptr;
 }
 
 Insertable_Element *Packer::select_element_by_volume(const Free_Space &selected_free_space){

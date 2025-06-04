@@ -127,3 +127,22 @@ void compare_packers(int file_index, int dataset) {
     std::cout<<"\n";
     std::cout<<Insertion_Coordinates_Displayer().display_all_coordinates_in_list(tree_packer_results);
 }
+
+
+void simple_packer_trial(int file_index, int dataset) {
+    auto data=read_file("BR data set\\br"+std::to_string(file_index)+".txt");
+    auto [container,boxes]=data[dataset];
+    Packer packer(boxes,container,Packer::by_max_volume);
+    auto packer_results=packer.pack();
+    std::cout<<"Simple Packer effectiveness: "<<calculate_container_usage(container,packer_results)<<"\n";
+    std::cout<<Insertion_Coordinates_Displayer().display_all_coordinates_in_list(packer_results);
+}
+
+void tree_packer_trial(int file_index, int dataset) {
+    auto data=read_file("BR data set\\br"+std::to_string(file_index)+".txt");
+    auto [container,boxes]=data[dataset];
+    Scenerio_Tree_Packer tree_packer(boxes,container,2,{2,2});
+    auto tree_packer_results=tree_packer.pack();
+    std::cout<<"Tree Packer effectiveness: "<<calculate_container_usage(container,tree_packer_results)<<"\n";
+    std::cout<<Insertion_Coordinates_Displayer().display_all_coordinates_in_list(tree_packer_results);
+}

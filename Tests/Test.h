@@ -9,6 +9,7 @@
 class Test {
 public:
     bool test_insertable_element_rotation();
+    bool test_blocks_creation();
 };
 
 

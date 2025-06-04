@@ -6,6 +6,7 @@
 
 #include <functional>
 #include <list>
+#include <map>
 #include <memory>
 #include "A_Packer.h"
 #include "Box.h"
@@ -13,6 +14,7 @@
 #include "Container.h"
 
 
+class Parallel_Tree_Packer;
 
 class Packer: public A_Packer {
     unsigned int min_fill_ratio=80;
@@ -33,12 +35,20 @@ public:
         by_first_satisfying_element
     };
 
+    static const std::map<Element_Selecting_Method, std::function<Insertable_Element *(Packer *, Free_Space&)>> selection_methods;
+
     Packer(const std::list<Box>& boxes, const Container& container, Element_Selecting_Method method=by_max_volume);
+    explicit Packer(const Parallel_Tree_Packer* other);
     std::list<std::unique_ptr<A_Insertion_Coordinates>> pack() override;
+    std::unique_ptr<A_Insertion_Coordinates> pack_single_element(Insertable_Element *element);
+
+    Insertable_Element *get_element_by_id(unsigned int id);
 
     void visit(Box *box) override;
     void visit(Simple_Block *block) override;
     void visit(Complex_Block *block) override;
+
+    friend class Test;
 };
 
 #endif //MASTERS_WORK_PACKER_H

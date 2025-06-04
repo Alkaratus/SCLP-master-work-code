@@ -32,6 +32,12 @@ A_Packer::A_Packer(const A_Packer &other):container(other.container){
     }
 }
 
+A_Packer::A_Packer(const A_Packer *other):container(other->container) {
+    for (const auto& element: other->elements) {
+        elements.push_back(element->get_element_copy());
+    }
+}
+
 
 void A_Packer::create_elements_rotations() {
     list<unique_ptr<Insertable_Element>>rotations;

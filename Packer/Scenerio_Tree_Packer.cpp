@@ -5,7 +5,6 @@
 #include "Scenerio_Tree_Packer.h"
 
 #include <algorithm>
-#include <iostream>
 #include <utility>
 
 #include "Box.h"
@@ -34,7 +33,7 @@ Insertable_Element * Scenerio_Tree_Packer::get_element_by_id(const unsigned int 
     return nullptr;
 }
 
-list<std::pair<std::unique_ptr<A_Insertion_Coordinates>,int>> Scenerio_Tree_Packer::pack_one_element(unsigned int scenerio_level) {
+list<std::pair<std::unique_ptr<A_Insertion_Coordinates>,int>> Scenerio_Tree_Packer::find_best_scenerio(unsigned int scenerio_level) {
     if(!get_container().have_free_space_available()) {
         return {};
     }
@@ -71,7 +70,7 @@ list<std::pair<std::unique_ptr<A_Insertion_Coordinates>,int>> Scenerio_Tree_Pack
 
             insertions.emplace_back(std::move(insertion),mark);
             test_packers[i]->delete_element(element_to_pack);
-            auto next_elements=test_packers[i]->pack_one_element(scenerio_level+1);
+            auto next_elements=test_packers[i]->find_best_scenerio(scenerio_level+1);
             for(auto &element : next_elements) {
                 insertions.emplace_back(std::move(element));
             }
@@ -117,10 +116,9 @@ list<std::unique_ptr<A_Insertion_Coordinates>> Scenerio_Tree_Packer::pack() {
     //std::cout<<get_container().get_text_list_of_free_spaces()<<std::endl;
     list<std::unique_ptr<A_Insertion_Coordinates>> packing_coordinates;
     while((!get_elements().empty())&&(get_container().have_free_space_available())) {
-        auto best_scenerio=pack_one_element(0);
+        auto best_scenerio=find_best_scenerio(0);
         auto selected_free_space=get_container().select_free_space();
         if(best_scenerio.empty()) {
-            //std::cout<<get_container().get_text_list_of_free_spaces()<<std::endl;
             continue;
         }
         auto element_to_pack=get_element_by_id((*best_scenerio.begin()).first->get_element_id());
@@ -130,7 +128,7 @@ list<std::unique_ptr<A_Insertion_Coordinates>> Scenerio_Tree_Packer::pack() {
         }
         packing_coordinates.emplace_back(get_container().insert_element_into_free_space(selected_free_space,element_to_pack));
         delete_element(element_to_pack);
-        //std::cout<<get_container().get_text_list_of_free_spaces()<<std::endl;
+
     }
     return packing_coordinates;
 }
