@@ -8,6 +8,7 @@
 #include "Container.h"
 #include "Packer.h"
 #include "Scenerio_Tree_Packer.h"
+#include "Parallel_Tree_Packer.h"
 #include "Insertion_Coordinates_Displayer.h"
 #include <fstream>
 
@@ -21,10 +22,11 @@ int main(int argc, char*argv[]){
     Container container(10,10,10);
     auto boxes= generate_boxes(container.get_volume(),geometrical_distribution,5);
     //Packer packer(boxes,container);
-    Scenerio_Tree_Packer packer(boxes,container,2,{2,2});
+    //Scenerio_Tree_Packer packer(boxes,container,2,{2,2});
+    Parallel_Tree_Packer packer(boxes,container,{2});
     auto packing_result=packer.pack();
-    std::fstream file("app_coordinates.json",std::ios::out);
-    file<<Visualisation_Coordinates_Displayer().get_data_for_visualisation(&packer,packing_result);
+    //std::fstream file("app_coordinates.json",std::ios::out);
+    //file<<Visualisation_Coordinates_Displayer().get_data_for_visualisation(&packer,packing_result);
     std::cout<<calculate_container_usage(container,packing_result);
     return 0;
 }

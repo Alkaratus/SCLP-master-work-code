@@ -142,10 +142,10 @@ void Scenerio_Tree_Packer::visit(Box *box) {
         }
         else if(it->get()->get_id()==box->get_id()){
             element_to_delete=it;
-            it++;
+            ++it;
         }
         else{
-            it++;
+            ++it;
         }
     }
     get_elements().erase(element_to_delete);

@@ -11,6 +11,7 @@ public:
     std::string accept(I_Coordinates_Displayer* displayer) override;
 
     [[nodiscard]] unsigned int get_element_id() const override;
+    [[nodiscard]] std::unique_ptr<A_Insertion_Coordinates>create_copy() const override;
 };
 
 

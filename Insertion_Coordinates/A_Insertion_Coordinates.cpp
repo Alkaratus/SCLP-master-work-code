@@ -4,6 +4,7 @@
 
 #include "A_Insertion_Coordinates.h"
 
+
 #include <utility>
 
 A_Insertion_Coordinates::A_Insertion_Coordinates(Point_3D start_point,Element_3D sizes): start_point(start_point),
@@ -38,3 +39,10 @@ Element_3D A_Insertion_Coordinates::get_sizes() const{
 }
 
 
+std::list<std::unique_ptr<A_Insertion_Coordinates>>create_copy(const std::list<std::unique_ptr<A_Insertion_Coordinates>>& other) {
+    std::list<std::unique_ptr<A_Insertion_Coordinates>> new_list;
+    for (auto &coordinate : other) {
+        new_list.emplace_back(coordinate->create_copy());
+    }
+    return new_list;
+}

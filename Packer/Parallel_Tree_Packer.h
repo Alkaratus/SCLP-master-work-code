@@ -17,6 +17,8 @@ class Parallel_Tree_Packer: public A_Packer {
 
     std::list<std::pair<std::unique_ptr<Parallel_Tree_Packer>,std::list<std::unique_ptr<A_Insertion_Coordinates>>>> get_scenerios(unsigned int level,
         const std::list<std::unique_ptr<A_Insertion_Coordinates>>& previous);
+    std::list<std::unique_ptr<A_Insertion_Coordinates>> pack_naive();
+    Insertable_Element *select_element_by_volume(const Free_Space &selected_free_space);
 public:
     enum Element_Selecting_Method {
         by_max_volume,

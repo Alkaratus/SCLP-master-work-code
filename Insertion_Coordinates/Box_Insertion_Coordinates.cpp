@@ -14,3 +14,7 @@ std::string Box_Insertion_Coordinates::accept(I_Coordinates_Displayer* displayer
 unsigned int Box_Insertion_Coordinates::get_element_id() const{
     return element_id;
 }
+
+std::unique_ptr<A_Insertion_Coordinates> Box_Insertion_Coordinates::create_copy() const {
+    return std::make_unique<Box_Insertion_Coordinates>(*this);
+}

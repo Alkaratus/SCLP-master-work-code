@@ -8,7 +8,8 @@
 int main() {
     //simple_packer_trial();
     //tree_packer_trial();
+    parallel_packer_trial();
     //mock_up_trial();
-    tree_packer_trial(1,1);
+    //tree_packer_trial(1,1);
     return 0;
 }

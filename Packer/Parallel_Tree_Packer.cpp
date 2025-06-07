@@ -8,7 +8,7 @@
 #include "Packer.h"
 #include "Simple_Block.h"
 
-using std::list,std::pair;
+using std::list,std::pair,std::unique_ptr;
 
 Parallel_Tree_Packer::Parallel_Tree_Packer(const std::list<Box> &boxes, const Container &container, std::vector<unsigned int> scenerios_in_level):
 A_Packer(convert_boxes_to_elements(boxes),container),scenerios_in_level(std::move(scenerios_in_level)){
@@ -26,31 +26,31 @@ Insertable_Element * Parallel_Tree_Packer::get_element_by_id(const unsigned int 
 
 std::list<std::unique_ptr<A_Insertion_Coordinates>> Parallel_Tree_Packer::pack() {
     list<std::unique_ptr<A_Insertion_Coordinates>> packing_coordinates;
-    for(int i=0;i<scenerios_in_level.size();i++) {
-        std::vector<std::unique_ptr<Packer>> scenerio_packers;
-        scenerio_packers.emplace_back(std::make_unique<Packer>(this));
-        auto free_space_iterator=get_container().select_free_space();
-        auto free_space=*(*free_space_iterator);
-        auto elements_ids=select_elements_to_pack_ids(free_space,i);
-        std::vector<std::unique_ptr<Packer>> test_packers(scenerios_in_level[i]);
-        for(unsigned int j=0;i<scenerios_in_level[j];i++) {
-            test_packers[j]=std::make_unique<Packer>(this);
-            auto element_to_pack=test_packers[j]->get_element_by_id(elements_ids[j].first);
-
+    auto scenerios=get_scenerios(0,{});
+    for(auto &scenerio:scenerios) {
+        auto results=scenerio.first->pack_naive();
+        scenerio.second.insert(scenerio.second.end(),std::make_move_iterator(results.begin()),std::make_move_iterator(results.end()));
+    }
+    auto best_scenerio=scenerios.begin();
+    double best_container_usage=0;
+    for(auto it=scenerios.begin();it!=scenerios.end();++it) {
+        auto container_usage=calculate_container_usage(get_container(),it->second);
+        if(container_usage>best_container_usage) {
+            best_container_usage=container_usage;
+            best_scenerio=it;
         }
     }
-    return packing_coordinates;
+    return std::move(best_scenerio->second);
 }
 
-list<pair<std::unique_ptr<Parallel_Tree_Packer>,list<std::unique_ptr<A_Insertion_Coordinates>>>> Parallel_Tree_Packer::get_scenerios(
-    unsigned int level, const list<std::unique_ptr<A_Insertion_Coordinates>>& previous) {
-    //TODO dokończyć i przetestować
-    list<pair<std::unique_ptr<Parallel_Tree_Packer>,list<std::unique_ptr<A_Insertion_Coordinates>>>> scenerios;
+list<pair<unique_ptr<Parallel_Tree_Packer>,list<unique_ptr<A_Insertion_Coordinates>>>> Parallel_Tree_Packer::get_scenerios(
+    unsigned int level, const list<unique_ptr<A_Insertion_Coordinates>>& previous) {
+    list<pair<unique_ptr<Parallel_Tree_Packer>,list<unique_ptr<A_Insertion_Coordinates>>>> scenerios;
     auto free_space_iterator=get_container().select_free_space();
     auto free_space=*(*free_space_iterator);
     auto elements_ids=select_elements_to_pack_ids(free_space,level);
-    std::vector<std::unique_ptr<Parallel_Tree_Packer>> test_packers(scenerios_in_level[level]);
-    for(unsigned int i=0;i<scenerios_in_level[i];i++) {
+    std::vector<unique_ptr<Parallel_Tree_Packer>> test_packers(scenerios_in_level[level]);
+    for(unsigned int i=0;i<scenerios_in_level[level];++i) {
         test_packers[i]=std::make_unique<Parallel_Tree_Packer>(*this);
         auto element_to_pack=test_packers[i]->get_element_by_id(elements_ids[i].first);
         auto rotated= element_to_pack->get_element_rotated_in_y();
@@ -58,16 +58,52 @@ list<pair<std::unique_ptr<Parallel_Tree_Packer>,list<std::unique_ptr<A_Insertion
         if(!(*selected_free_space)->can_element_be_inserted(element_to_pack)) {
             element_to_pack=rotated.get();
         }
-        auto insertion=test_packers[i]->get_container().insert_element_into_free_space(selected_free_space,element_to_pack);
-        auto new_previous=previous;
+        auto insertion=test_packers[i]->get_container().insert_element_into_free_space(test_packers[i]->get_container().select_free_space(),element_to_pack);
+        test_packers[i]->delete_element(element_to_pack);
+        auto new_previous=create_copy(previous);
         new_previous.emplace_back(std::move(insertion));
         if(level<scenerios_in_level.size()-1) {
             auto new_scenerios= test_packers[i]->get_scenerios(level+1,new_previous);
-            scenerios.insert(scenerios.end(),new_scenerios.begin(),new_scenerios.end());
+            scenerios.insert(scenerios.end(),std::make_move_iterator(new_scenerios.begin()),std::make_move_iterator(new_scenerios.end()));
+        }else {
+            scenerios.emplace_back(std::move(test_packers[i]),std::move(new_previous));
         }
     }
     return scenerios;
 }
+
+std::list<std::unique_ptr<A_Insertion_Coordinates>> Parallel_Tree_Packer::pack_naive() {
+    list<std::unique_ptr<A_Insertion_Coordinates>> packing_coordinates;
+    while((!get_elements().empty())&&(get_container().have_free_space_available())){
+        auto free_space_iterator=get_container().select_free_space();
+        auto free_space=*(*free_space_iterator);
+        if(auto element= select_element_by_volume(free_space); element!= nullptr){
+            packing_coordinates.emplace_back(get_container().insert_element_into_free_space(free_space_iterator,element));
+            delete_element(element);
+        }
+        else{
+            get_container().remove_free_space(*free_space_iterator);
+        }
+
+    }
+    return packing_coordinates;
+}
+
+Insertable_Element * Parallel_Tree_Packer::select_element_by_volume(const Free_Space &selected_free_space) {
+    Insertable_Element* best_fill_element=nullptr;
+    unsigned int best_fill_ratio=0;
+    for(auto &element:get_elements()){
+        if(selected_free_space.can_element_be_inserted(element.get())){
+            auto fill_ratio= element->get_volume() * FILL_SCALE / selected_free_space.get_volume();
+            if(fill_ratio > best_fill_ratio){
+                best_fill_ratio=fill_ratio;
+                best_fill_element=element.get();
+            }
+        }
+    }
+    return best_fill_element;
+}
+
 
 void Parallel_Tree_Packer::create_blocks() {
     get_elements().sort(compare_elements_ptr_by_lengths);
